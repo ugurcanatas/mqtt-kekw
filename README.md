@@ -1,0 +1,3 @@
+## MQTT JS CLIENT
+
+This is a javascript client that generates MQTT packets and sends those packets using TCP & WebSocket. More later...
