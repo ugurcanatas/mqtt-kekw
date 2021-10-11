@@ -17,11 +17,13 @@ type TypePacketConfig = {
 type TypePacketConnect = {
   controlPacketType: number;
   flags?: TypeConnectFlags;
-  //will: TypeWill;
+  will?: TypeWill;
+  keepAlive?: number;
+  clientID?: string;
 };
 
 type TypeConnectFlags = {
-  username?: "" | string;
+  username?: string;
   password?: string;
   willRetain?: boolean;
   willQoS_1?: number;
@@ -35,4 +37,10 @@ type TypeWill = {
   willMessage: string;
 };
 
-export { TypeHostConfig, TypePacketConfig, TypePacketConnect };
+export {
+  TypeHostConfig,
+  TypePacketConfig,
+  TypePacketConnect,
+  TypeConnectFlags,
+  TypeWill,
+};
