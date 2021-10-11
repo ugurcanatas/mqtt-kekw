@@ -1,7 +1,11 @@
 //Entry file
-import { TypeHostConfig, TypePacketConfig } from "./types/libtypes";
+import {
+  TypeHostConfig,
+  TypePacketConfig,
+  TypePacketConnect,
+} from "./types/libtypes";
 
-import { CONTROL_PACKET_TYPES } from "./utils";
+import { CONTROL_PACKET_TYPES } from "./utils.js";
 import net from "net";
 import EventEmitter from "events";
 
@@ -71,12 +75,37 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
     return PACKET_TYPE[type];
   };
 
+  const sendConnectPacket = ({
+    controlPacketType,
+    flags = {
+      username: undefined,
+      password: undefined,
+      willRetain: false,
+      willQoS_2: 0,
+      willQoS_1: 0,
+      willFlag: false,
+      cleanSession: true,
+    },
+  }: TypePacketConnect) => {
+    const fixedHeader = buildFixedHeader({ type: controlPacketType });
+    const variableHeader = buildVariableHeader();
+    console.log(flags);
+    //Check flags later
+    // if (flags !== undefined) {
+    //   const {username, password} = flags;
+    // }
+
+    //Check flags, convert all of them to hexadecimal
+  };
+
   const sendPacket = ({ controlPacketType }: TypePacketConfig) => {
     const fixedHeader = buildFixedHeader({ type: controlPacketType });
 
     switch (controlPacketType) {
       case CONTROL_PACKET_TYPES.CONNECT:
-        connect();
+        throw new Error(
+          "Please use client.sendConnectPacket() function to send connection packet. "
+        );
         break;
       case CONTROL_PACKET_TYPES.SUBSCRIBE:
         break;
@@ -86,6 +115,9 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
     }
   };
 
+  /**
+   * @private
+   */
   const connect = () => {
     let remainingLength = []; //Calculate size later
     let variableHeader = buildVariableHeader();
@@ -96,6 +128,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
     up,
     listen: customEmiter,
     sendPacket,
+    sendConnectPacket,
   };
 };
 
