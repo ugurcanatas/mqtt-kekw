@@ -1,11 +1,18 @@
 //Entry file
 import {
+  TypeConnectFlags,
   TypeHostConfig,
   TypePacketConfig,
   TypePacketConnect,
+  TypeWill,
 } from "./types/libtypes";
 
-import { CONTROL_PACKET_TYPES } from "./utils.js";
+import {
+  CONTROL_PACKET_TYPES,
+  RESPONSE_TYPES_DECIMAL,
+  CONNECT_ERROR_MESSAGES,
+} from "./helpers/utils.js";
+import { buildConnectFlags } from "./helpers/packet-connect.js";
 import net from "net";
 import EventEmitter from "events";
 
@@ -30,7 +37,39 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
     customEmiter.emit("close", hadError)
   );
 
-  client.on("data", (data: Buffer | string) => customEmiter.emit("data", data));
+  client.on("data", (data: Buffer) => {
+    console.log("Data Received", data);
+    const firstOffset = data.readUInt8(0);
+    switch (firstOffset) {
+      case RESPONSE_TYPES_DECIMAL.CONNACK:
+        const connackBytes = new Uint8Array(data);
+        console.log("CONNACK Uint8 Array", connackBytes);
+
+        //connackBytes[3] indicates the return code from the server after connect packet received
+        switch (connackBytes[3]) {
+          case CONNECT_ERROR_MESSAGES[0].decimal:
+            console.log("Connection Accepted !!!!");
+            customEmiter.emit("connection-accepted", {
+              returnCode: CONNECT_ERROR_MESSAGES[0].returnCode,
+              message: CONNECT_ERROR_MESSAGES[0].description,
+            });
+            break;
+
+          default:
+            console.log("Connection Refused");
+            customEmiter.emit("connection-refused", {
+              responseCode: CONNECT_ERROR_MESSAGES[connackBytes[3]].returnCode,
+              message: CONNECT_ERROR_MESSAGES[0].description,
+            });
+            break;
+        }
+
+        break;
+
+      default:
+        break;
+    }
+  });
 
   /**
    * Should return 7 bytes
@@ -57,8 +96,8 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
   //Filter and return fixed header raw hex value
   const buildFixedHeader = ({ type }: { type: number }) => {
     const PACKET_TYPE: { [key: number]: any } = {
-      1: 0x10, //CONNECT
-      2: 0x20, //CONNACK
+      1: 0x10, //CONNECT 16 Decimal
+      2: 0x20, //CONNACK 32 Decimal
       3: 0x30, //PUBLISH - Check Publish flags later Qos1 Qos2 etc...
       4: 0x40, //PUBACK
       5: 0x50, //PUBREC
@@ -86,16 +125,71 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
       willFlag: false,
       cleanSession: true,
     },
+    keepAlive = 60,
+    clientID = "mqttTestClient",
+    will = {
+      willTopic: "topic",
+      willMessage: "message",
+    },
   }: TypePacketConnect) => {
+    //build fixed header
     const fixedHeader = buildFixedHeader({ type: controlPacketType });
+    //build variable header
     const variableHeader = buildVariableHeader();
-    console.log(flags);
-    //Check flags later
-    // if (flags !== undefined) {
-    //   const {username, password} = flags;
-    // }
+    //Check flags, convert binary array to decimal
+    const connectFlags = buildConnectFlags(flags);
+    //Create keep alive array, change here later.
+    const keepAliveByte = new Uint8Array([0, keepAlive]);
 
-    //Check flags, convert all of them to hexadecimal
+    let clientPayload = new Uint8Array([
+      0,
+      clientID.length,
+      ...clientID.split("").map((v) => v.charCodeAt(0)),
+    ]);
+
+    let willTopicPayload = flags.willFlag
+      ? new Uint8Array([
+          0,
+          will.willTopic.length,
+          ...will.willTopic.split("").map((v) => v.charCodeAt(0)),
+        ])
+      : [];
+
+    let willMessagePayload = flags.willFlag
+      ? new Uint8Array([
+          0,
+          will.willMessage.length,
+          ...will.willMessage.split("").map((v) => v.charCodeAt(0)),
+        ])
+      : [];
+
+    console.log("Testing so far ");
+    console.log("Fixed Header", fixedHeader);
+    console.log("Variable Header", variableHeader);
+    console.log("Connect Flags", connectFlags);
+    console.log("Client Payload ", clientPayload);
+
+    let buffer = Buffer.from(
+      [
+        fixedHeader,
+        //remaining length
+        keepAliveByte.length + variableHeader.length + clientPayload.length + 1,
+        ...variableHeader,
+        connectFlags,
+        ...keepAliveByte,
+        ...clientPayload,
+      ] as any,
+      "hex"
+    );
+    //If there is a will, add them to the end of the buffer aswell
+    if (flags.willFlag) {
+      buffer = Buffer.concat([
+        buffer,
+        Buffer.from([...willTopicPayload, ...willMessagePayload]),
+      ]);
+    }
+    console.log("HEX Buffer", buffer);
+    client.write(buffer);
   };
 
   const sendPacket = ({ controlPacketType }: TypePacketConfig) => {
