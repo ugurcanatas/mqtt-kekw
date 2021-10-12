@@ -1,5 +1,6 @@
 //Entry file
 import {
+  InterfaceSubscribe,
   TypeConnectFlags,
   TypeHostConfig,
   TypePacketConfig,
@@ -69,6 +70,37 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
 
       case RESPONSE_TYPES_DECIMAL.PINGRESP:
         console.log("Ping Response From Server");
+        break;
+      case RESPONSE_TYPES_DECIMAL.SUBACK:
+        console.log("SUBACK received");
+        break;
+      case RESPONSE_TYPES_DECIMAL.PACKET_RECEIVED:
+        console.log("Publish Packet Received", data.readUInt8());
+        const remainingLength = data.readUInt8(1);
+        //next two bits indicate the length of the topic
+        console.log("Reading remaining length", remainingLength);
+        const topicLength = data.readUInt8(2) + data.readUInt8(3);
+        console.log("Topic Length", topicLength);
+
+        console.log("Topic");
+        for (let index = topicLength; index < topicLength * 2; index++) {
+          //console.log("Topic Data decoding", data.readUInt8(index));
+          console.log(
+            "String conversion",
+            String.fromCharCode(data.readUInt8(index))
+          );
+        }
+
+        console.log("Sub Message");
+        //read rest
+        for (let index = topicLength * 2; index <= remainingLength; index++) {
+          //console.log("Sub message decoding", data.readUInt8(index));
+          console.log(
+            "String conversion",
+            String.fromCharCode(data.readUInt8(index))
+          );
+        }
+
         break;
 
       default:
@@ -197,7 +229,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
     client.write(buffer);
   };
 
-  const sendPacket = ({ controlPacketType }: TypePacketConfig) => {
+  const sendPacket = ({ controlPacketType, packetType }: TypePacketConfig) => {
     const fixedHeader = buildFixedHeader({ type: controlPacketType });
 
     switch (controlPacketType) {
@@ -207,6 +239,35 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
         );
         break;
       case CONTROL_PACKET_TYPES.SUBSCRIBE:
+        const { topic, requestedQoS } = packetType as InterfaceSubscribe;
+        let encodedTopic = null;
+        if (typeof topic === "string") {
+          //single topic
+          encodedTopic = new Uint8Array([
+            0,
+            topic.length,
+            ...topic.split("").map((v) => v.charCodeAt(0)),
+            requestedQoS, //Requested QOS
+          ]);
+          console.log("Subscribe packet is => ", encodedTopic);
+        } else {
+          //array of topics. loop
+          encodedTopic = new Uint8Array();
+        }
+        //packet identifier at variable header.
+        const packetIdentifier = new Uint8Array([0, 16]);
+
+        const subscribeBuffer = Buffer.from(
+          [
+            fixedHeader,
+            packetIdentifier.length + encodedTopic.length,
+            ...packetIdentifier,
+            ...encodedTopic,
+          ] as any,
+          "hex"
+        );
+        console.log("Sub Buffer", subscribeBuffer);
+        client.write(subscribeBuffer);
         break;
       case CONTROL_PACKET_TYPES.PUBLISH:
         //Fixed Header byte 1 - bits 7-4 => Packet Type, bits 3-0 => Respectively, DUP Flag, (bits 2 and 1) QoS Level, Retain
@@ -217,7 +278,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
         // byte 2
         break;
       case CONTROL_PACKET_TYPES.PINGREQ:
-        pingReq({ type: controlPacketType });
+        pingRequest({ type: controlPacketType });
         break;
       case CONTROL_PACKET_TYPES.DISCONNECT:
         disconnectRequest({ fixedHeader });
@@ -235,7 +296,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
   };
 
   //Response d0 00
-  const pingReq = ({ type }: { type: number }) => {
+  const pingRequest = ({ type }: { type: number }) => {
     //Fixed Header 1 1 0 0 0 0 0 0
     const fixedHeader = buildFixedHeader({ type });
     const request = new Uint8Array([fixedHeader, 0]);
@@ -250,7 +311,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
     listen: customEmiter,
     sendPacket,
     sendConnectPacket,
-    pingReq,
+    pingRequest,
   };
 };
 

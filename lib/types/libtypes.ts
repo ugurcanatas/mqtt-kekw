@@ -12,7 +12,7 @@ type TypeHostConfig = {
  */
 type TypePacketConfig = {
   controlPacketType: number;
-  packetType?: InterfacePublish;
+  packetType?: InterfacePublish | InterfaceSubscribe;
 };
 
 interface InterfacePublish {
@@ -22,6 +22,11 @@ interface InterfacePublish {
   QoS1: 0 | 1;
   QoS2: 0 | 1;
   retain: 0 | 1;
+}
+
+interface InterfaceSubscribe {
+  topic: string | string[];
+  requestedQoS: 0 | 1;
 }
 
 interface InterfacePing {}
@@ -55,4 +60,6 @@ export {
   TypePacketConnect,
   TypeConnectFlags,
   TypeWill,
+  InterfacePublish,
+  InterfaceSubscribe,
 };

@@ -16,9 +16,11 @@ export const CONTROL_PACKET_TYPES = {
 };
 
 export const RESPONSE_TYPES_DECIMAL = {
+  PACKET_RECEIVED: 48,
   CONNECT: 16,
   CONNACK: 32,
   PINGRESP: 208,
+  SUBACK: 144,
 };
 
 export const CONNECT_ERROR_MESSAGES: { [key: number]: any } = {

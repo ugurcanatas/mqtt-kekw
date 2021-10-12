@@ -21,3 +21,6 @@
 - [x] Implement <code>DISCONNECT</code> Packet Types
 - [x] Implement <code>PINGREQ</code> Packet Types
 - [x] Implement filtering <code>PINGRESP</code>
+
+- [] Implement decoding received <code>PUBLISH</code> packet from Broker
+  - [] Add promises/async/await when reading the buffer
