@@ -40,6 +40,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
   client.on("data", (data: Buffer) => {
     console.log("Data Received", data);
     const firstOffset = data.readUInt8(0);
+    console.log("Data ReceivedFirst Offset", firstOffset);
     switch (firstOffset) {
       case RESPONSE_TYPES_DECIMAL.CONNACK:
         const connackBytes = new Uint8Array(data);
@@ -64,6 +65,10 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
             break;
         }
 
+        break;
+
+      case RESPONSE_TYPES_DECIMAL.PINGRESP:
+        console.log("Ping Response From Server");
         break;
 
       default:
@@ -211,19 +216,33 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
         // byte 1 topic name
         // byte 2
         break;
+      case CONTROL_PACKET_TYPES.PINGREQ:
+        pingReq({ type: controlPacketType });
+        break;
+      case CONTROL_PACKET_TYPES.DISCONNECT:
+        disconnectRequest({ fixedHeader });
+        break;
 
       default:
         break;
     }
   };
 
-  /**
-   * @private
-   */
-  const connect = () => {
-    let remainingLength = []; //Calculate size later
-    let variableHeader = buildVariableHeader();
-    console.log("ON Connect Message: variableHeader", variableHeader);
+  const disconnectRequest = ({ fixedHeader }: { fixedHeader: any }) => {
+    const buffer = Buffer.from(new Uint8Array([fixedHeader, 0]) as any, "hex");
+    client.write(buffer);
+    client.destroy();
+  };
+
+  //Response d0 00
+  const pingReq = ({ type }: { type: number }) => {
+    //Fixed Header 1 1 0 0 0 0 0 0
+    const fixedHeader = buildFixedHeader({ type });
+    const request = new Uint8Array([fixedHeader, 0]);
+    console.log("Ping Request Dec", request);
+    console.log("Ping Request Hex Buffer", Buffer.from(request as any, "hex"));
+    const reqBuffer = Buffer.from(request as any, "hex");
+    client.write(reqBuffer);
   };
 
   return {
@@ -231,6 +250,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
     listen: customEmiter,
     sendPacket,
     sendConnectPacket,
+    pingReq,
   };
 };
 

@@ -15,4 +15,9 @@
   - [x] Connack Decoding hex buffer as Uint8Array.
   - [x] Emit events using connect _return codes_ as filter. EG: <code>connect-accepted</code>
 - [] Implement <code>PUBLISH</code> Packet Types
+
   - [] Build PUB Packet Headers & Payload
+
+- [x] Implement <code>DISCONNECT</code> Packet Types
+- [x] Implement <code>PINGREQ</code> Packet Types
+- [x] Implement filtering <code>PINGRESP</code>

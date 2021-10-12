@@ -12,7 +12,7 @@ type TypeHostConfig = {
  */
 type TypePacketConfig = {
   controlPacketType: number;
-  packetType: InterfacePublish;
+  packetType?: InterfacePublish;
 };
 
 interface InterfacePublish {
