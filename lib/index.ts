@@ -13,9 +13,14 @@ import {
   RESPONSE_TYPES_DECIMAL,
   CONNECT_ERROR_MESSAGES,
 } from "./helpers/utils.js";
-import { buildConnectFlags } from "./helpers/packet-connect.js";
+import {
+  buildConnectFlags,
+  parseSubscribePacket,
+} from "./helpers/general-helpers.js";
 import net from "net";
 import EventEmitter from "events";
+import { performance } from "perf_hooks";
+import { rejects } from "assert";
 
 const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
   let customEmiter = new EventEmitter();
@@ -75,31 +80,11 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
         console.log("SUBACK received");
         break;
       case RESPONSE_TYPES_DECIMAL.PACKET_RECEIVED:
-        console.log("Publish Packet Received", data.readUInt8());
-        const remainingLength = data.readUInt8(1);
-        //next two bits indicate the length of the topic
-        console.log("Reading remaining length", remainingLength);
-        const topicLength = data.readUInt8(2) + data.readUInt8(3);
-        console.log("Topic Length", topicLength);
-
-        console.log("Topic");
-        for (let index = topicLength; index < topicLength * 2; index++) {
-          //console.log("Topic Data decoding", data.readUInt8(index));
-          console.log(
-            "String conversion",
-            String.fromCharCode(data.readUInt8(index))
-          );
-        }
-
-        console.log("Sub Message");
-        //read rest
-        for (let index = topicLength * 2; index <= remainingLength; index++) {
-          //console.log("Sub message decoding", data.readUInt8(index));
-          console.log(
-            "String conversion",
-            String.fromCharCode(data.readUInt8(index))
-          );
-        }
+        console.log("Publish Packet Received");
+        const { topic, payload } = parseSubscribePacket({ data });
+        console.log(
+          `Topic received: ${topic} ### Payload received: ${payload}`
+        );
 
         break;
 

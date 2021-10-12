@@ -22,5 +22,7 @@
 - [x] Implement <code>PINGREQ</code> Packet Types
 - [x] Implement filtering <code>PINGRESP</code>
 
-- [] Implement decoding received <code>PUBLISH</code> packet from Broker
+- [x] Implement <code>SUBSCRIBE</code> Packet Type
+
+- [] Implement decoding received <code>PUBLISH</code> Packet from Broker
   - [] Add promises/async/await when reading the buffer
