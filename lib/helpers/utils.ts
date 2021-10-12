@@ -16,7 +16,7 @@ export const CONTROL_PACKET_TYPES = {
 };
 
 export const RESPONSE_TYPES_DECIMAL = {
-  PACKET_RECEIVED: 48,
+  PACKET_RECEIVED: 48, // Testing git rebase here
   CONNECT: 16,
   CONNACK: 32,
   PINGRESP: 208,
