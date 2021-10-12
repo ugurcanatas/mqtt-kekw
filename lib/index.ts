@@ -203,6 +203,14 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
         break;
       case CONTROL_PACKET_TYPES.SUBSCRIBE:
         break;
+      case CONTROL_PACKET_TYPES.PUBLISH:
+        //Fixed Header byte 1 - bits 7-4 => Packet Type, bits 3-0 => Respectively, DUP Flag, (bits 2 and 1) QoS Level, Retain
+        //Remaining Length byte 2
+        // Variable Header: Respectively
+        // topic length [MSB,LSB] [0,length of topic, ...each topic character]
+        // byte 1 topic name
+        // byte 2
+        break;
 
       default:
         break;
