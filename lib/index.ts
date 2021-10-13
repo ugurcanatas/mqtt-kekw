@@ -11,6 +11,7 @@ import TypedEmitter from "typed-emitter";
 import {
   InterfaceMessageEvents,
   InterfaceSubscribe,
+  InterfaceUnsubscribe,
   TypeHostConfig,
   TypePacketConfig,
   TypePacketConnect,
@@ -18,7 +19,7 @@ import {
 import {
   CONTROL_PACKET_TYPES,
   RESPONSE_TYPES_DECIMAL,
-  CONNECT_ERROR_MESSAGES,
+  CONNACK_ERROR_MESSAGES,
 } from "./helpers/utils.js";
 import {
   buildConnectFlags,
@@ -29,18 +30,31 @@ import {
 } from "./helpers/general-helpers.js";
 
 const kekw = (
-  { hostAddress = "localhost", port = 1883 }: TypeHostConfig,
-  callbackFn: () => void
+  { hostAddress = "localhost", port = 1883, timeout = 5000 }: TypeHostConfig,
+  callbackFn: () => void,
+  onFailed: (message: string) => void
 ) => {
+  let connected = false;
   let client = new net.Socket();
   client.connect(port, hostAddress, callbackFn);
   let customEmiter = new EventEmitter() as TypedEmitter<InterfaceMessageEvents>;
+  setTimeout(() => {
+    if (!connected) {
+      onFailed(
+        "Client did not receive a CONNACK packet for a reasonable amount of time. Closing..."
+      );
+      client.destroy();
+    }
+  }, timeout);
   // (() => {
   //   console.log("This is a anon function that starts at the beginning !");
   //   client.connect(port, hostAddress, callbackFn);
   // })();
 
-  client.on("ready", () => customEmiter.emit("ready"));
+  client.on("ready", () => {
+    connected = true;
+    customEmiter.emit("ready");
+  });
 
   client.on("error", (error: Error) => {
     customEmiter.emit("error", error);
@@ -57,36 +71,30 @@ const kekw = (
     console.log("Data ReceivedFirst Offset", firstOffset);
     switch (firstOffset) {
       case RESPONSE_TYPES_DECIMAL.CONNACK:
-        const connackBytes = new Uint8Array(data);
-        console.log("CONNACK Uint8 Array", connackBytes);
-
+        const { data: connackBytes } = data.toJSON();
+        console.log("CONNACK JSON", connackBytes);
+        //add Connect Acknowledge Flags filter later.
         //connackBytes[3] indicates the return code from the server after connect packet received
         switch (connackBytes[3]) {
-          case CONNECT_ERROR_MESSAGES[0].decimal:
-            console.log("Connection Accepted !!!!");
+          case CONNACK_ERROR_MESSAGES[0].decimal:
             customEmiter.emit("connectionAccepted", {
-              returnCode: CONNECT_ERROR_MESSAGES[0].returnCode,
-              message: CONNECT_ERROR_MESSAGES[0].description,
+              returnCode: CONNACK_ERROR_MESSAGES[0].returnCode,
+              message: CONNACK_ERROR_MESSAGES[0].description,
             });
             break;
-
           default:
-            console.log("Connection Refused");
             customEmiter.emit("connectionRefused", {
-              returnCode: CONNECT_ERROR_MESSAGES[connackBytes[3]].returnCode,
-              message: CONNECT_ERROR_MESSAGES[0].description,
+              returnCode: CONNACK_ERROR_MESSAGES[connackBytes[3]].returnCode,
+              message: CONNACK_ERROR_MESSAGES[0].description,
             });
             break;
         }
 
         break;
-
       case RESPONSE_TYPES_DECIMAL.PINGRESP:
-        console.log("Ping Response From Server");
         customEmiter.emit("pingresp", "Server pinged back!!!");
         break;
       case RESPONSE_TYPES_DECIMAL.SUBACK:
-        console.log("SUBACK received");
         const suback = parseSubackData({ data });
         customEmiter.emit("suback", suback);
         break;
@@ -203,7 +211,14 @@ const kekw = (
           console.log("Subscribe packet is => ", encodedTopic);
         } else {
           //array of topics. loop
-          encodedTopic = new Uint8Array();
+          encodedTopic = topic
+            .map((v) => [
+              0,
+              v.length,
+              ...v.split("").map((v) => v.charCodeAt(0)),
+              requestedQoS,
+            ])
+            .reduce((f, s) => [...f, ...s]);
         }
         //packet identifier at variable header.
         const packetIdentifier = new Uint8Array([0, 16]);
@@ -222,6 +237,36 @@ const kekw = (
         break;
       case CONTROL_PACKET_TYPES.UNSUBSCRIBE:
         //send unsubscribe packet
+        //fixed header.
+        // remaining length
+        const { packetIdentifier: subPI, topic: subTopics } =
+          packetType as InterfaceUnsubscribe;
+        let encodedUnsubTopic = [];
+        if (typeof subTopics === "string") {
+          encodedUnsubTopic = [
+            0,
+            subTopics.length,
+            ...subTopics.split("").map((v) => v.charCodeAt(0)),
+          ];
+        } else {
+          encodedUnsubTopic = subTopics
+            .map((v) => [
+              0,
+              v.length,
+              ...v.split("").map((v) => v.charCodeAt(0)),
+            ])
+            .reduce((f, s) => [...f, ...s]);
+        }
+
+        let remainingLength = encodedUnsubTopic.length + subPI.length;
+        const buffer = Buffer.from([
+          fixedHeader,
+          remainingLength,
+          ...subPI,
+          ...encodedUnsubTopic,
+        ]);
+        console.log("Unsubscribe Buffer", buffer);
+        client.write(buffer);
 
         break;
       case CONTROL_PACKET_TYPES.PUBLISH:

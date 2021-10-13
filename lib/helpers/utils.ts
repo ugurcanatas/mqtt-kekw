@@ -25,7 +25,7 @@ export const RESPONSE_TYPES_DECIMAL = {
   SUBACK: 144,
 };
 
-export const CONNECT_ERROR_MESSAGES: { [key: number]: any } = {
+export const CONNACK_ERROR_MESSAGES: { [key: number]: any } = {
   0: {
     decimal: 0,
     hex: 0x00,

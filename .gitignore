@@ -7,3 +7,5 @@ dist
 lib/test.ts
 
 .env
+
+NOTES.md

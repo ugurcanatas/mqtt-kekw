@@ -28,14 +28,19 @@
 
   - [x] Emit event when <code>SUBACK</code> happens
   - [x] Send subscribe packet
-  - [x] Sending list of subscribe topics
+  - [x] Subscribe to array of topics or a single topic done.
+  - [] Add array of QoS instead of single QoS
   - [] Check Subscribe docs for missed parts
 
 - [] Implement <code>SUBACK</code>
 
-  - [] Emit an event when <code>SUBACK</code> happens
-  - [] Return packetID with emitted event as an argument
+  - [x] Emit an event when <code>SUBACK</code> happens
+  - [x] Return packetID with emitted event as an argument
   - [] Add multiple topic check if client subscribed to multiple topics
+
+- [] Implement <code>UNSUBSCRIBE</code>
+
+  - [x] Unsubbing from single and multiple topics tested.
 
 - [] Implement decoding received <code>PUBLISH</code> Packet from Broker
 
@@ -43,4 +48,4 @@
 
 - [] Use net module emitter instead of creating a new emitter.
 
-- [] Add [typed-emitter](https://github.com/andywer/typed-emitter)
+- [x] Add [typed-emitter](https://github.com/andywer/typed-emitter)

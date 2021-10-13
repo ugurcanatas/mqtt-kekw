@@ -1,6 +1,13 @@
 type TypeHostConfig = {
   hostAddress?: string;
   port?: number;
+  /**
+   * From Oasis Docs:
+   * If the Client does not receive a CONNACK Packet from the Server within a reasonable amount of time, the Client SHOULD close the Network Connection.
+   * A "reasonable" amount of time depends on the type of application and the communications infrastructure.
+   * Default set to 5000ms in parameters
+   */
+  timeout?: number;
 };
 /**
  * TypePacketConfig
@@ -35,6 +42,7 @@ interface InterfaceSubscribe {
 
 interface InterfaceUnsubscribe {
   topic: string | string[];
+  packetIdentifier: number[];
 }
 
 interface TypePacketConnect {
@@ -99,9 +107,10 @@ export {
   TypePacketConnect,
   TypeConnectFlags,
   TypeWill,
-  InterfacePublish,
-  InterfaceSubscribe,
   TypeSuback,
   TypeSubackReturnCodes,
   InterfaceMessageEvents,
+  InterfacePublish,
+  InterfaceSubscribe,
+  InterfaceUnsubscribe,
 };
