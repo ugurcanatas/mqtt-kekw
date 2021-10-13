@@ -1,4 +1,4 @@
-import { TypeSubackReturn } from "../types/libtypes";
+import { TypeSubackReturnCodes } from "../types/libtypes";
 
 export const CONTROL_PACKET_TYPES = {
   CONNECT: 1,
@@ -67,7 +67,7 @@ export const CONNECT_ERROR_MESSAGES: { [key: number]: any } = {
   },
 };
 
-export const SUBACK_RETURN_TYPES: { [key: number]: TypeSubackReturn } = {
+export const SUBACK_RETURN_TYPES: { [key: number]: TypeSubackReturnCodes } = {
   0: {
     type: "Success",
     message: "0x00 - Success - Maximum QoS 0",

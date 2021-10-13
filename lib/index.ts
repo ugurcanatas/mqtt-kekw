@@ -1,5 +1,15 @@
+/**
+ * @author Uğurcan Emre Ataş <ugurcanemre93@gmail.com>
+ * Date: 05.10.2021
+ *
+ * Add unit testing for these functions.
+ */
 //Entry file
+import net from "net";
+import EventEmitter from "events";
+import TypedEmitter from "typed-emitter";
 import {
+  InterfaceMessageEvents,
   InterfaceSubscribe,
   TypeHostConfig,
   TypePacketConfig,
@@ -17,16 +27,14 @@ import {
   buildFixedHeader,
   parseSubackData,
 } from "./helpers/general-helpers.js";
-import net from "net";
-import EventEmitter from "events";
 
 const kekw = (
-  { hostAddress = "localhost", port }: TypeHostConfig,
+  { hostAddress = "localhost", port = 1883 }: TypeHostConfig,
   callbackFn: () => void
 ) => {
   let client = new net.Socket();
   client.connect(port, hostAddress, callbackFn);
-  let customEmiter = new EventEmitter();
+  let customEmiter = new EventEmitter() as TypedEmitter<InterfaceMessageEvents>;
   // (() => {
   //   console.log("This is a anon function that starts at the beginning !");
   //   client.connect(port, hostAddress, callbackFn);
@@ -56,7 +64,7 @@ const kekw = (
         switch (connackBytes[3]) {
           case CONNECT_ERROR_MESSAGES[0].decimal:
             console.log("Connection Accepted !!!!");
-            customEmiter.emit("connection-accepted", {
+            customEmiter.emit("connectionAccepted", {
               returnCode: CONNECT_ERROR_MESSAGES[0].returnCode,
               message: CONNECT_ERROR_MESSAGES[0].description,
             });
@@ -64,8 +72,8 @@ const kekw = (
 
           default:
             console.log("Connection Refused");
-            customEmiter.emit("connection-refused", {
-              responseCode: CONNECT_ERROR_MESSAGES[connackBytes[3]].returnCode,
+            customEmiter.emit("connectionRefused", {
+              returnCode: CONNECT_ERROR_MESSAGES[connackBytes[3]].returnCode,
               message: CONNECT_ERROR_MESSAGES[0].description,
             });
             break;
@@ -75,7 +83,7 @@ const kekw = (
 
       case RESPONSE_TYPES_DECIMAL.PINGRESP:
         console.log("Ping Response From Server");
-        customEmiter.emit("ping-response", "Server pinged back!!!");
+        customEmiter.emit("pingresp", "Server pinged back!!!");
         break;
       case RESPONSE_TYPES_DECIMAL.SUBACK:
         console.log("SUBACK received");
@@ -212,6 +220,10 @@ const kekw = (
         console.log("Sub Buffer", subscribeBuffer);
         client.write(subscribeBuffer);
         break;
+      case CONTROL_PACKET_TYPES.UNSUBSCRIBE:
+        //send unsubscribe packet
+
+        break;
       case CONTROL_PACKET_TYPES.PUBLISH:
         //Fixed Header byte 1 - bits 7-4 => Packet Type, bits 3-0 => Respectively, DUP Flag, (bits 2 and 1) QoS Level, Retain
         //Remaining Length byte 2
@@ -244,6 +256,12 @@ const kekw = (
     const request = new Uint8Array([fixedHeader, 0]);
     const reqBuffer = Buffer.from(request as any, "hex");
     client.write(reqBuffer);
+  };
+
+  const unsubscribeRequest = ({ fixedHeader }: { fixedHeader: any }) => {
+    //byte 1 fixed header
+    //byte 2 remaining length
+    //byte 3 and 4 packet identifier MSB & LSB which is 00 10
   };
 
   return {

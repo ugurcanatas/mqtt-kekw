@@ -28,10 +28,19 @@
 
   - [x] Emit event when <code>SUBACK</code> happens
   - [x] Send subscribe packet
+  - [x] Sending list of subscribe topics
   - [] Check Subscribe docs for missed parts
+
+- [] Implement <code>SUBACK</code>
+
+  - [] Emit an event when <code>SUBACK</code> happens
+  - [] Return packetID with emitted event as an argument
+  - [] Add multiple topic check if client subscribed to multiple topics
 
 - [] Implement decoding received <code>PUBLISH</code> Packet from Broker
 
   - [] Check docs for missed parts
 
 - [] Use net module emitter instead of creating a new emitter.
+
+- [] Add [typed-emitter](https://github.com/andywer/typed-emitter)

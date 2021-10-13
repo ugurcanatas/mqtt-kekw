@@ -5,7 +5,7 @@
  * Add unit testing for these functions.
  */
 
-import { TypeConnectFlags, TypeSubackReturn } from "../types/libtypes";
+import { TypeConnectFlags, TypeSuback } from "../types/libtypes";
 import { SUBACK_RETURN_TYPES } from "./utils.js";
 
 /**
@@ -170,12 +170,20 @@ export const buildFixedHeader = ({ type }: { type: number }) => {
  * We don't need to check all of SUBACK packet here. Last byte would suffice since last byte is a return type
  * @returns
  */
-export const parseSubackData = ({
-  data,
-}: {
-  data: Buffer;
-}): TypeSubackReturn => {
-  //get the last byte
-  const lastByte = data.readUInt8(data.byteLength - 1);
-  return SUBACK_RETURN_TYPES[lastByte];
+export const parseSubackData = ({ data }: { data: Buffer }): TypeSuback => {
+  const { data: bufferData } = data.toJSON();
+  //console.log("Buffer To JSON", bufferData);
+  // first one is fixedHeader, second is remainingLength.
+  const [, , piMSB, piLSB] = bufferData;
+
+  let returnCodes = [];
+  for (let index = 4; index < bufferData.length; index++) {
+    const returnType = bufferData[index];
+    returnCodes.push(SUBACK_RETURN_TYPES[returnType]);
+  }
+
+  return {
+    returnCodes,
+    packetID: [piMSB, piLSB],
+  };
 };

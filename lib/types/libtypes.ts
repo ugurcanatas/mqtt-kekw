@@ -1,6 +1,6 @@
 type TypeHostConfig = {
   hostAddress?: string;
-  port: number;
+  port?: number;
 };
 /**
  * TypePacketConfig
@@ -12,7 +12,11 @@ type TypeHostConfig = {
  */
 type TypePacketConfig = {
   controlPacketType: number;
-  packetType?: InterfacePublish | InterfaceSubscribe | TypePacketConnect;
+  packetType?:
+    | InterfacePublish
+    | InterfaceSubscribe
+    | TypePacketConnect
+    | InterfaceUnsubscribe;
 };
 
 interface InterfacePublish {
@@ -29,7 +33,9 @@ interface InterfaceSubscribe {
   requestedQoS: 0 | 1;
 }
 
-interface InterfacePing {}
+interface InterfaceUnsubscribe {
+  topic: string | string[];
+}
 
 interface TypePacketConnect {
   controlPacketType: number;
@@ -54,11 +60,38 @@ type TypeWill = {
   willMessage: string;
 };
 
-type TypeSubackReturn = {
+type TypeSuback = {
+  packetID: number[];
+  returnCodes: TypeSubackReturnCodes[];
+};
+
+type TypeSubackReturnCodes = {
   type: string;
   message: string;
   returnCode: string;
 };
+
+interface InterfaceMessageEvents {
+  ready: () => void;
+  error: (error: Error) => void;
+  close: (hadError: boolean) => void;
+  connectionAccepted: ({
+    returnCode,
+    message,
+  }: {
+    returnCode: any;
+    message: string;
+  }) => void;
+  connectionRefused: ({
+    returnCode,
+    message,
+  }: {
+    returnCode: any;
+    message: string;
+  }) => void;
+  suback: (payload: TypeSuback) => void;
+  pingresp: (payload: string) => void;
+}
 
 export {
   TypeHostConfig,
@@ -68,5 +101,7 @@ export {
   TypeWill,
   InterfacePublish,
   InterfaceSubscribe,
-  TypeSubackReturn,
+  TypeSuback,
+  TypeSubackReturnCodes,
+  InterfaceMessageEvents,
 };
