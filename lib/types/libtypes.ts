@@ -29,10 +29,10 @@ type TypePacketConfig = {
 interface InterfacePublish {
   topic: string; // indicates publish topic
   message: string; //indicates payload.
-  dupFlag: 0 | 1; //Dup flag should set to 0 if first occasion. If re-delivery, DUP flag should set to 1
-  QoS1: 0 | 1;
-  QoS2: 0 | 1;
-  retain: 0 | 1;
+  dupFlag?: 0 | 1; //Dup flag should set to 0 if first occasion. If re-delivery, DUP flag should set to 1
+  QoS1?: 0 | 1;
+  QoS2?: 0 | 1;
+  retain?: 0 | 1;
 }
 
 interface InterfaceSubscribe {

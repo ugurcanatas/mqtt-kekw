@@ -10,6 +10,7 @@ import EventEmitter from "events";
 import TypedEmitter from "typed-emitter";
 import {
   InterfaceMessageEvents,
+  InterfacePublish,
   InterfaceSubscribe,
   InterfaceUnsubscribe,
   TypeHostConfig,
@@ -30,6 +31,7 @@ import {
   buildUnsubscribe,
   buildSubscribe,
   parseUnsubackData,
+  buildPublish,
 } from "./helpers/general-helpers.js";
 
 const kekw = (
@@ -226,6 +228,12 @@ const kekw = (
         // topic length [MSB,LSB] [0,length of topic, ...each topic character]
         // byte 1 topic name
         // byte 2
+        const pubBuffer = buildPublish(
+          packetType as InterfacePublish,
+          fixedHeader
+        );
+        console.log("Build Buffer", pubBuffer);
+        client.write(pubBuffer);
         break;
       case CONTROL_PACKET_TYPES.PINGREQ:
         pingRequest({ type: controlPacketType });

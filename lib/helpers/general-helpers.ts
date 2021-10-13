@@ -6,6 +6,7 @@
  */
 
 import {
+  InterfacePublish,
   InterfaceSubscribe,
   InterfaceUnsubscribe,
   TypeConnectFlags,
@@ -285,4 +286,53 @@ export const buildUnsubscribe = (
   ]);
   console.log("Unsubscribe Buffer", buffer);
   return buffer;
+};
+
+/**
+ *
+ * @param param0
+ * @param fixedHeader
+ * @returns
+ *
+ * @TODO send variable header if QoS Level > 0
+ */
+export const buildPublish = (
+  {
+    message,
+    topic,
+    QoS1 = 0,
+    QoS2 = 0,
+    dupFlag = 0,
+    retain = 0,
+  }: InterfacePublish,
+  fixedHeader: any
+) => {
+  console.log("Publish Fixed Header", fixedHeader);
+  //fixed header
+  const fixedHeaderDecimal = parseInt(
+    `0011${dupFlag}${QoS2}${QoS1}${retain}`,
+    2
+  );
+  //variable header
+  const topicArray = [
+    0,
+    topic.length,
+    ...topic.split("").map((v) => v.charCodeAt(0)),
+  ];
+
+  const messageArray = [
+    0,
+    message.length,
+    ...message.split("").map((v) => v.charCodeAt(0)),
+  ];
+
+  const buffer = Buffer.from([
+    fixedHeaderDecimal,
+    topicArray.length + messageArray.length,
+    ...topicArray,
+    ...messageArray,
+  ]);
+  return buffer;
+
+  // Test without packet id first. const packetID = [0,]
 };
