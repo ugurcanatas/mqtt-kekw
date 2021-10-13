@@ -1,8 +1,9 @@
 /**
- * @author Uğurcan Emre Ataş <ugurcanemre93@gmail.com>
- * Date: 05.10.2021
- *
- * Add unit testing for these functions.
+ * @author Uğurcan Emre Ataş
+ * @email ugurcanemre93@gmail.com
+ * @create date 2021-10-14 01:28:31
+ * @modify date 2021-10-14 01:28:31
+ * @desc [description]
  */
 
 import {
@@ -10,6 +11,7 @@ import {
   InterfaceSubscribe,
   InterfaceUnsubscribe,
   TypeConnectFlags,
+  TypePubackPubrecPubrel,
   TypeSuback,
   TypeUnsuback,
 } from "../types/libtypes";
@@ -294,19 +296,37 @@ export const buildUnsubscribe = (
  * @param fixedHeader
  * @returns
  *
+ * QoS definitions
+ * QoS Value    Bit 2   Bit 1   Description
+ * -----------------------------------------
+ *     0          0       0     At most once delivery
+ *     1          0       1     At least once delivery
+ *     2          1       0     Exactly once delivery
+ *     3          1       1     Reserver - Must not be used
+ *
  * @TODO send variable header if QoS Level > 0
  */
 export const buildPublish = (
   {
     message,
     topic,
-    QoS1 = 0,
+    QoS1 = 1,
     QoS2 = 0,
     dupFlag = 0,
     retain = 0,
   }: InterfacePublish,
   fixedHeader: any
 ) => {
+  console.log("QoS Data", QoS1, QoS2);
+
+  if (QoS1 == 1 && QoS2 == 1) {
+    throw new Error(
+      "QoS level bits cannot be value 1 at the same time in a Publish Packet. ERR: Reserved – must not be used"
+    );
+  }
+  if (QoS1 == 0 && QoS2 == 0) {
+    dupFlag = 0;
+  }
   console.log("Publish Fixed Header", fixedHeader);
   //fixed header
   const fixedHeaderDecimal = parseInt(
@@ -325,14 +345,38 @@ export const buildPublish = (
     message.length,
     ...message.split("").map((v) => v.charCodeAt(0)),
   ];
+  let buffer;
+  if (QoS1 > 0 || QoS2 > 0) {
+    buffer = Buffer.from([
+      fixedHeaderDecimal,
+      topicArray.length + messageArray.length + 2,
+      ...topicArray,
+      ...[0, 10],
+      ...messageArray,
+    ]);
+  } else {
+    buffer = Buffer.from([
+      fixedHeaderDecimal,
+      topicArray.length + messageArray.length,
+      ...topicArray,
+      ...messageArray,
+    ]);
+  }
 
-  const buffer = Buffer.from([
-    fixedHeaderDecimal,
-    topicArray.length + messageArray.length,
-    ...topicArray,
-    ...messageArray,
-  ]);
   return buffer;
 
   // Test without packet id first. const packetID = [0,]
+};
+
+/**
+ * Used for PUBACK, PUBREC, PUBREL
+ */
+export const parsePubResponses = ({
+  data,
+}: {
+  data: Buffer;
+}): TypePubackPubrecPubrel => {
+  const { data: response } = data.toJSON();
+  const [, , piMSB, piLSB] = response;
+  return { packetID: [piMSB, piLSB] };
 };

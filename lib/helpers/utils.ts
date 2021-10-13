@@ -1,3 +1,10 @@
+/**
+ * @author Uğurcan Emre Ataş
+ * @email ugurcanemre93@gmail.com
+ * @create date 2021-10-14 01:27:39
+ * @modify date 2021-10-14 01:27:39
+ * @desc [description]
+ */
 import { TypeSubackReturnCodes } from "../types/libtypes";
 
 export const CONTROL_PACKET_TYPES = {
@@ -24,6 +31,8 @@ export const RESPONSE_TYPES_DECIMAL = {
   PINGRESP: 208,
   SUBACK: 144,
   UNSUBACK: 176,
+  PUBACK: 64,
+  PUBREC: 80,
 };
 
 export const CONNACK_ERROR_MESSAGES: { [key: number]: any } = {

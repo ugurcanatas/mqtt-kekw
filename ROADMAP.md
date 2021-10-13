@@ -14,9 +14,9 @@
 - [x] Implement Decoding <code>CONNACK</code> Packet Types
   - [x] Connack Decoding hex buffer as Uint8Array.
   - [x] Emit events using connect _return codes_ as filter. EG: <code>connect-accepted</code>
-- [] Implement <code>PUBLISH</code> Packet Types
+- [x] Implement <code>PUBLISH</code> Packet Types
 
-  - [] Build PUB Packet Headers & Payload
+  - [x] Build PUB Packet Headers & Payload
 
 - [x] Implement <code>DISCONNECT</code> Packet Types
 - [x] Implement <code>PINGREQ</code> Packet Types
@@ -44,8 +44,11 @@
 
 - [x] Implement <code>UNSUBACK</code> with event emitters.
 
-- [] Implement decoding received <code>PUBLISH</code> Packet from Broker
+- [x] Implement decoding received <code>PUBLISH</code> Packet from Broker
 
+  - [x] <code>PUBACK</code>
+  - [x] <code>PUBREC</code>
+  - [] <code>PUBREL</code>
   - [] Check docs for missed parts
 
 - [] Use net module emitter instead of creating a new emitter.

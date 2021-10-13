@@ -1,9 +1,11 @@
 /**
- * @author Uğurcan Emre Ataş <ugurcanemre93@gmail.com>
- * Date: 05.10.2021
- *
- * Add unit testing for these functions.
+ * @author Uğurcan Emre Ataş
+ * @email ugurcanemre93@gmail.com
+ * @create date 2021-10-14 01:28:21
+ * @modify date 2021-10-14 01:28:21
+ * @desc [description]
  */
+
 //Entry file
 import net from "net";
 import EventEmitter from "events";
@@ -32,6 +34,7 @@ import {
   buildSubscribe,
   parseUnsubackData,
   buildPublish,
+  parsePubResponses,
 } from "./helpers/general-helpers.js";
 
 const kekw = (
@@ -106,6 +109,20 @@ const kekw = (
       case RESPONSE_TYPES_DECIMAL.UNSUBACK:
         const unsuback = parseUnsubackData({ data });
         customEmiter.emit("unsuback", unsuback);
+        break;
+      /**
+       * QoS = 1, At least once delivery
+       */
+      case RESPONSE_TYPES_DECIMAL.PUBACK:
+        const pubackPacketID = parsePubResponses({ data });
+        customEmiter.emit("puback", pubackPacketID);
+        break;
+      /**
+       * QoS = 2, At most once delivery
+       */
+      case RESPONSE_TYPES_DECIMAL.PUBREC:
+        const pubrecPacketID = parsePubResponses({ data });
+        customEmiter.emit("pubrec", pubrecPacketID);
         break;
       case RESPONSE_TYPES_DECIMAL.PACKET_RECEIVED:
         console.log("Publish Packet Received");

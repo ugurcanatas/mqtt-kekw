@@ -1,3 +1,11 @@
+/**
+ * @author Uğurcan Emre Ataş
+ * @email ugurcanemre93@gmail.com
+ * @create date 2021-10-14 01:28:38
+ * @modify date 2021-10-14 01:28:38
+ * @desc [description]
+ */
+
 type TypeHostConfig = {
   hostAddress?: string;
   port?: number;
@@ -83,6 +91,10 @@ type TypeSubackReturnCodes = {
   returnCode: string;
 };
 
+type TypePubackPubrecPubrel = {
+  packetID: number[];
+};
+
 interface InterfaceMessageEvents {
   ready: () => void;
   error: (error: Error) => void;
@@ -103,6 +115,8 @@ interface InterfaceMessageEvents {
   }) => void;
   suback: (payload: TypeSuback) => void;
   unsuback: (payload: TypeUnsuback) => void;
+  puback: (payload: TypePubackPubrecPubrel) => void;
+  pubrec: (payload: TypePubackPubrecPubrel) => void;
   pingresp: (payload: string) => void;
 }
 
@@ -115,6 +129,7 @@ export {
   TypeSuback,
   TypeSubackReturnCodes,
   TypeUnsuback,
+  TypePubackPubrecPubrel,
   InterfaceMessageEvents,
   InterfacePublish,
   InterfaceSubscribe,
