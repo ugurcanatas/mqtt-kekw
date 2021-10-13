@@ -12,7 +12,7 @@ type TypeHostConfig = {
  */
 type TypePacketConfig = {
   controlPacketType: number;
-  packetType?: InterfacePublish | InterfaceSubscribe;
+  packetType?: InterfacePublish | InterfaceSubscribe | TypePacketConnect;
 };
 
 interface InterfacePublish {
@@ -31,13 +31,13 @@ interface InterfaceSubscribe {
 
 interface InterfacePing {}
 
-type TypePacketConnect = {
+interface TypePacketConnect {
   controlPacketType: number;
   flags?: TypeConnectFlags;
   will?: TypeWill;
   keepAlive?: number;
   clientID?: string;
-};
+}
 
 type TypeConnectFlags = {
   username?: string;
@@ -54,6 +54,12 @@ type TypeWill = {
   willMessage: string;
 };
 
+type TypeSubackReturn = {
+  type: string;
+  message: string;
+  returnCode: string;
+};
+
 export {
   TypeHostConfig,
   TypePacketConfig,
@@ -62,4 +68,5 @@ export {
   TypeWill,
   InterfacePublish,
   InterfaceSubscribe,
+  TypeSubackReturn,
 };

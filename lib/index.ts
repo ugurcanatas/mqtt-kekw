@@ -1,13 +1,10 @@
 //Entry file
 import {
   InterfaceSubscribe,
-  TypeConnectFlags,
   TypeHostConfig,
   TypePacketConfig,
   TypePacketConnect,
-  TypeWill,
 } from "./types/libtypes";
-
 import {
   CONTROL_PACKET_TYPES,
   RESPONSE_TYPES_DECIMAL,
@@ -16,21 +13,24 @@ import {
 import {
   buildConnectFlags,
   parseSubscribePacket,
+  buildVariableHeader,
+  buildFixedHeader,
+  parseSubackData,
 } from "./helpers/general-helpers.js";
 import net from "net";
 import EventEmitter from "events";
-import { performance } from "perf_hooks";
-import { rejects } from "assert";
 
-const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
-  let customEmiter = new EventEmitter();
+const kekw = (
+  { hostAddress = "localhost", port }: TypeHostConfig,
+  callbackFn: () => void
+) => {
   let client = new net.Socket();
-  console.log("KekW Called");
-
-  const up = () => {
-    console.log("KekW UP", hostAddress);
-    client.connect(port, hostAddress, () => customEmiter.emit("connected"));
-  };
+  client.connect(port, hostAddress, callbackFn);
+  let customEmiter = new EventEmitter();
+  // (() => {
+  //   console.log("This is a anon function that starts at the beginning !");
+  //   client.connect(port, hostAddress, callbackFn);
+  // })();
 
   client.on("ready", () => customEmiter.emit("ready"));
 
@@ -75,9 +75,12 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
 
       case RESPONSE_TYPES_DECIMAL.PINGRESP:
         console.log("Ping Response From Server");
+        customEmiter.emit("ping-response", "Server pinged back!!!");
         break;
       case RESPONSE_TYPES_DECIMAL.SUBACK:
         console.log("SUBACK received");
+        const suback = parseSubackData({ data });
+        customEmiter.emit("suback", suback);
         break;
       case RESPONSE_TYPES_DECIMAL.PACKET_RECEIVED:
         console.log("Publish Packet Received");
@@ -92,49 +95,6 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
         break;
     }
   });
-
-  /**
-   * Should return 7 bytes
-   * first two bytes indicates the length of the protocol name. eg: "MQTT", length is 4
-   * Each byte after first two is hex encodes of "MQTT" characters respectively.
-   * 7th byte indicates protocol level. Which is decimal: 4, hex: 04
-   *
-   * MQTT > 3.1
-   *
-   * @todo add support for other MQTT versions later.
-   */
-  const buildVariableHeader = () => {
-    /**
-     * @link http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Table_2.1_-
-     * "The 8 bit unsigned value that represents the revision level of the protocol used by the Client.
-     * The value of the Protocol Level field for the version 3.1.1 of the protocol is 4 (0x04)"
-     */
-    const protocolLevelByte = 0x04;
-    const protocolNameBytes = "MQTT".split("").map((v) => v.charCodeAt(0));
-
-    return [0, "MQTT".length, ...protocolNameBytes, protocolLevelByte];
-  };
-
-  //Filter and return fixed header raw hex value
-  const buildFixedHeader = ({ type }: { type: number }) => {
-    const PACKET_TYPE: { [key: number]: any } = {
-      1: 0x10, //CONNECT 16 Decimal
-      2: 0x20, //CONNACK 32 Decimal
-      3: 0x30, //PUBLISH - Check Publish flags later Qos1 Qos2 etc...
-      4: 0x40, //PUBACK
-      5: 0x50, //PUBREC
-      6: 0x62, //PUBREL
-      7: 0x70, //PUBCOMP
-      8: 0x82, //SUBSCRIBE
-      9: 0x90, //SUBACK
-      10: 0xa2, //UNSUBSCRIBE
-      11: 0xb0, //UNSUBACK
-      12: 0xc0, //PINGREQ
-      13: 0xd0, //PINGRESP
-      14: 0xe0, //DISCONNECT
-    };
-    return PACKET_TYPE[type];
-  };
 
   const sendConnectPacket = ({
     controlPacketType,
@@ -219,9 +179,7 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
 
     switch (controlPacketType) {
       case CONTROL_PACKET_TYPES.CONNECT:
-        throw new Error(
-          "Please use client.sendConnectPacket() function to send connection packet. "
-        );
+        sendConnectPacket({ controlPacketType });
         break;
       case CONTROL_PACKET_TYPES.SUBSCRIBE:
         const { topic, requestedQoS } = packetType as InterfaceSubscribe;
@@ -282,21 +240,16 @@ const kekw = ({ hostAddress = "localhost", port }: TypeHostConfig) => {
 
   //Response d0 00
   const pingRequest = ({ type }: { type: number }) => {
-    //Fixed Header 1 1 0 0 0 0 0 0
     const fixedHeader = buildFixedHeader({ type });
     const request = new Uint8Array([fixedHeader, 0]);
-    console.log("Ping Request Dec", request);
-    console.log("Ping Request Hex Buffer", Buffer.from(request as any, "hex"));
     const reqBuffer = Buffer.from(request as any, "hex");
     client.write(reqBuffer);
   };
 
   return {
-    up,
+    //up,
     listen: customEmiter,
     sendPacket,
-    sendConnectPacket,
-    pingRequest,
   };
 };
 

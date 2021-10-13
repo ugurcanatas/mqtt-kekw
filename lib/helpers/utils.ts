@@ -1,3 +1,5 @@
+import { TypeSubackReturn } from "../types/libtypes";
+
 export const CONTROL_PACKET_TYPES = {
   CONNECT: 1,
   CONNACK: 2,
@@ -62,5 +64,28 @@ export const CONNECT_ERROR_MESSAGES: { [key: number]: any } = {
     hex: 0x05,
     returnCode: "0x05 Connection Refused, not authorized",
     description: "The Client is not authorized to connect",
+  },
+};
+
+export const SUBACK_RETURN_TYPES: { [key: number]: TypeSubackReturn } = {
+  0: {
+    type: "Success",
+    message: "0x00 - Success - Maximum QoS 0",
+    returnCode: "0x00",
+  },
+  1: {
+    type: "Success",
+    message: "0x01 - Success - Maximum QoS 1",
+    returnCode: "0x01",
+  },
+  2: {
+    type: "Success",
+    message: "0x02 - Success - Maximum QoS 2",
+    returnCode: "0x02",
+  },
+  128: {
+    type: "Failure",
+    message: "Failure",
+    returnCode: "0x80",
   },
 };

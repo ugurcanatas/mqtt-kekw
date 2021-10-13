@@ -1,9 +1,12 @@
 /**
  * @author Uğurcan Emre Ataş <ugurcanemre93@gmail.com>
  * Date: 05.10.2021
+ *
+ * Add unit testing for these functions.
  */
 
-import { TypeConnectFlags } from "../types/libtypes";
+import { TypeConnectFlags, TypeSubackReturn } from "../types/libtypes";
+import { SUBACK_RETURN_TYPES } from "./utils.js";
 
 /**
  * Connect flag bits in Connect Packet are located in byte 8.
@@ -71,30 +74,108 @@ export const parseSubscribePacket = ({
 }: {
   data: Buffer;
 }): { topic: string; payload: string } => {
+  //bit in location 1 indicates remainingLength.
   const remainingLength = data.readUInt8(1);
-  console.log("Reading remaining length", remainingLength);
-
   //next two bits indicate the length of the topic
   const topicLength = data.readUInt8(2) + data.readUInt8(3);
-  console.log("Reading Topic Length", topicLength);
 
   let topic = "";
   for (let index = 4; index < topicLength + 4; index++) {
-    //console.log("Topic Data decoding", data.readUInt8(index));
     topic += String.fromCharCode(data.readUInt8(index));
   }
 
-  console.log("Topic", topic);
   //read rest
   let payload = "";
   for (let index = topicLength + 4; index <= remainingLength + 1; index++) {
-    //console.log("Sub message decoding", data.readUInt8(index));
     payload += String.fromCharCode(data.readUInt8(index));
   }
-  console.log("Payload", payload);
 
   return {
     topic,
     payload,
   };
+};
+
+/**
+ * Variable header is used to indicate the protocol name length and protocol name.
+ * Protocol name is <code>MQTT</code> for now and static.
+ * According to docs, variable header in Connect Packet consists of:
+ * 2 bytes of protocol length (MQTT => 00 04) and 4 bytes of each character in MQTT.
+ * Protocol Level byte is not part of variable header but we can return Protocol Level byte with
+ * variable header since these bytes are respectively as follows: [Protocol Length MSB | Protocol Length LSB | M | Q | T | T | Protocol Level]
+ *
+ * MQTT > 3.1
+ *
+ * @link http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Table_2.1_-
+ * "The 8 bit unsigned value that represents the revision level of the protocol used by the Client.
+ * The value of the Protocol Level field for the version 3.1.1 of the protocol is 4 (0x04)"
+ *
+ * @TODO add support for other MQTT versions later.
+ */
+export const buildVariableHeader = () => {
+  //Fixed protocol level
+  const protocolLevelByte = 0x04;
+  const protocolNameBytes = "MQTT".split("").map((v) => v.charCodeAt(0));
+
+  return [0, "MQTT".length, ...protocolNameBytes, protocolLevelByte];
+};
+
+//Filter and return fixed header raw hex value
+export const buildFixedHeader = ({ type }: { type: number }) => {
+  const PACKET_TYPE: { [key: number]: any } = {
+    1: 0x10, //CONNECT 16 Decimal
+    2: 0x20, //CONNACK 32 Decimal
+    3: 0x30, //PUBLISH - Check Publish flags later Qos1 Qos2 etc...
+    4: 0x40, //PUBACK
+    5: 0x50, //PUBREC
+    6: 0x62, //PUBREL
+    7: 0x70, //PUBCOMP
+    8: 0x82, //SUBSCRIBE
+    9: 0x90, //SUBACK
+    10: 0xa2, //UNSUBSCRIBE
+    11: 0xb0, //UNSUBACK
+    12: 0xc0, //PINGREQ
+    13: 0xd0, //PINGRESP
+    14: 0xe0, //DISCONNECT
+  };
+  return PACKET_TYPE[type];
+};
+
+/**
+ *
+ * @param data Buffer from on("data")  event listener in TCP socket.
+ *
+ * According to oasis documentation; SUBACK packet is a subscribe acknowledgement package that service sends to the client.
+ * Packet consists of following.
+ *
+ * - ### Fixed Header
+ * - Byte 1 includes, bits [7-4] fixed header and bits [3-0] Reserved bits.
+ * - Byte 2 includes remaining length. Remaining length does not include fixed header and itself.
+ *
+ * - ### Variable Header
+ * - Byte 1 : Packet identifier MSB
+ * - Byte 2 : Packet identifier LSB
+ *
+ * - ### Payload
+ * - Payload consists of return codes. Allowed return codes are in the following.
+ *
+ * 0x00 - Success - Maximum QoS 0
+ *
+ * 0x01 - Success - Maximum QoS 1
+ *
+ * 0x02 - Success - Maximum QoS 2
+ *
+ * 0x80 - Failure
+ *
+ * We don't need to check all of SUBACK packet here. Last byte would suffice since last byte is a return type
+ * @returns
+ */
+export const parseSubackData = ({
+  data,
+}: {
+  data: Buffer;
+}): TypeSubackReturn => {
+  //get the last byte
+  const lastByte = data.readUInt8(data.byteLength - 1);
+  return SUBACK_RETURN_TYPES[lastByte];
 };

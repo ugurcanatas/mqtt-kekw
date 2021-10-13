@@ -22,7 +22,16 @@
 - [x] Implement <code>PINGREQ</code> Packet Types
 - [x] Implement filtering <code>PINGRESP</code>
 
-- [x] Implement <code>SUBSCRIBE</code> Packet Type
+  - [] Emit event when <code>PINGRESP</code> happens
+
+- [] Implement <code>SUBSCRIBE</code> Packet Type
+
+  - [x] Emit event when <code>SUBACK</code> happens
+  - [x] Send subscribe packet
+  - [] Check Subscribe docs for missed parts
 
 - [] Implement decoding received <code>PUBLISH</code> Packet from Broker
-  - [] Add promises/async/await when reading the buffer
+
+  - [] Check docs for missed parts
+
+- [] Use net module emitter instead of creating a new emitter.
