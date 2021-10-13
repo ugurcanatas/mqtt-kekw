@@ -27,6 +27,9 @@ import {
   buildVariableHeader,
   buildFixedHeader,
   parseSubackData,
+  buildUnsubscribe,
+  buildSubscribe,
+  parseUnsubackData,
 } from "./helpers/general-helpers.js";
 
 const kekw = (
@@ -97,6 +100,10 @@ const kekw = (
       case RESPONSE_TYPES_DECIMAL.SUBACK:
         const suback = parseSubackData({ data });
         customEmiter.emit("suback", suback);
+        break;
+      case RESPONSE_TYPES_DECIMAL.UNSUBACK:
+        const unsuback = parseUnsubackData({ data });
+        customEmiter.emit("unsuback", unsuback);
         break;
       case RESPONSE_TYPES_DECIMAL.PACKET_RECEIVED:
         console.log("Publish Packet Received");
@@ -198,75 +205,18 @@ const kekw = (
         sendConnectPacket({ controlPacketType });
         break;
       case CONTROL_PACKET_TYPES.SUBSCRIBE:
-        const { topic, requestedQoS } = packetType as InterfaceSubscribe;
-        let encodedTopic = null;
-        if (typeof topic === "string") {
-          //single topic
-          encodedTopic = new Uint8Array([
-            0,
-            topic.length,
-            ...topic.split("").map((v) => v.charCodeAt(0)),
-            requestedQoS, //Requested QOS
-          ]);
-          console.log("Subscribe packet is => ", encodedTopic);
-        } else {
-          //array of topics. loop
-          encodedTopic = topic
-            .map((v) => [
-              0,
-              v.length,
-              ...v.split("").map((v) => v.charCodeAt(0)),
-              requestedQoS,
-            ])
-            .reduce((f, s) => [...f, ...s]);
-        }
-        //packet identifier at variable header.
-        const packetIdentifier = new Uint8Array([0, 16]);
-
-        const subscribeBuffer = Buffer.from(
-          [
-            fixedHeader,
-            packetIdentifier.length + encodedTopic.length,
-            ...packetIdentifier,
-            ...encodedTopic,
-          ] as any,
-          "hex"
+        const subscribeBuffer = buildSubscribe(
+          packetType as InterfaceSubscribe,
+          fixedHeader
         );
-        console.log("Sub Buffer", subscribeBuffer);
         client.write(subscribeBuffer);
         break;
       case CONTROL_PACKET_TYPES.UNSUBSCRIBE:
-        //send unsubscribe packet
-        //fixed header.
-        // remaining length
-        const { packetIdentifier: subPI, topic: subTopics } =
-          packetType as InterfaceUnsubscribe;
-        let encodedUnsubTopic = [];
-        if (typeof subTopics === "string") {
-          encodedUnsubTopic = [
-            0,
-            subTopics.length,
-            ...subTopics.split("").map((v) => v.charCodeAt(0)),
-          ];
-        } else {
-          encodedUnsubTopic = subTopics
-            .map((v) => [
-              0,
-              v.length,
-              ...v.split("").map((v) => v.charCodeAt(0)),
-            ])
-            .reduce((f, s) => [...f, ...s]);
-        }
-
-        let remainingLength = encodedUnsubTopic.length + subPI.length;
-        const buffer = Buffer.from([
-          fixedHeader,
-          remainingLength,
-          ...subPI,
-          ...encodedUnsubTopic,
-        ]);
-        console.log("Unsubscribe Buffer", buffer);
-        client.write(buffer);
+        const unsubBuffer = buildUnsubscribe(
+          packetType as InterfaceUnsubscribe,
+          fixedHeader
+        );
+        client.write(unsubBuffer);
 
         break;
       case CONTROL_PACKET_TYPES.PUBLISH:
@@ -301,12 +251,6 @@ const kekw = (
     const request = new Uint8Array([fixedHeader, 0]);
     const reqBuffer = Buffer.from(request as any, "hex");
     client.write(reqBuffer);
-  };
-
-  const unsubscribeRequest = ({ fixedHeader }: { fixedHeader: any }) => {
-    //byte 1 fixed header
-    //byte 2 remaining length
-    //byte 3 and 4 packet identifier MSB & LSB which is 00 10
   };
 
   return {

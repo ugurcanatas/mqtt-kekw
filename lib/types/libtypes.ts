@@ -73,6 +73,10 @@ type TypeSuback = {
   returnCodes: TypeSubackReturnCodes[];
 };
 
+type TypeUnsuback = {
+  packetID: number[];
+};
+
 type TypeSubackReturnCodes = {
   type: string;
   message: string;
@@ -98,6 +102,7 @@ interface InterfaceMessageEvents {
     message: string;
   }) => void;
   suback: (payload: TypeSuback) => void;
+  unsuback: (payload: TypeUnsuback) => void;
   pingresp: (payload: string) => void;
 }
 
@@ -109,6 +114,7 @@ export {
   TypeWill,
   TypeSuback,
   TypeSubackReturnCodes,
+  TypeUnsuback,
   InterfaceMessageEvents,
   InterfacePublish,
   InterfaceSubscribe,

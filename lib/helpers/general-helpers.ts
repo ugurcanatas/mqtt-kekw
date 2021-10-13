@@ -5,7 +5,13 @@
  * Add unit testing for these functions.
  */
 
-import { TypeConnectFlags, TypeSuback } from "../types/libtypes";
+import {
+  InterfaceSubscribe,
+  InterfaceUnsubscribe,
+  TypeConnectFlags,
+  TypeSuback,
+  TypeUnsuback,
+} from "../types/libtypes";
 import { SUBACK_RETURN_TYPES } from "./utils.js";
 
 /**
@@ -167,7 +173,6 @@ export const buildFixedHeader = ({ type }: { type: number }) => {
  *
  * 0x80 - Failure
  *
- * We don't need to check all of SUBACK packet here. Last byte would suffice since last byte is a return type
  * @returns
  */
 export const parseSubackData = ({ data }: { data: Buffer }): TypeSuback => {
@@ -186,4 +191,98 @@ export const parseSubackData = ({ data }: { data: Buffer }): TypeSuback => {
     returnCodes,
     packetID: [piMSB, piLSB],
   };
+};
+
+export const parseUnsubackData = ({ data }: { data: Buffer }): TypeUnsuback => {
+  const { data: bufferData } = data.toJSON();
+  const [, , piMSB, piLSB] = bufferData;
+  return {
+    packetID: [piMSB, piLSB],
+  };
+};
+
+/**
+ *
+ * @param topic
+ * @param requestedQoS
+ * @param fixedHeader
+ *
+ * Add explanation later
+ *
+ *
+ * @returns Buffer
+ */
+export const buildSubscribe = (
+  { topic, requestedQoS }: InterfaceSubscribe,
+  fixedHeader: any
+) => {
+  let encodedTopic;
+  if (typeof topic === "string") {
+    //single topic
+    encodedTopic = [
+      0,
+      topic.length,
+      ...topic.split("").map((v) => v.charCodeAt(0)),
+      requestedQoS, //Requested QOS
+    ];
+    console.log("Subscribe packet is => ", encodedTopic);
+  } else {
+    //array of topics. loop
+    encodedTopic = topic
+      .map((v) => [
+        0,
+        v.length,
+        ...v.split("").map((v) => v.charCodeAt(0)),
+        requestedQoS,
+      ])
+      .reduce((f, s) => [...f, ...s]);
+  }
+  //packet identifier at variable header.
+  const packetIdentifier = [0, 16];
+
+  const subscribeBuffer = Buffer.from(
+    [
+      fixedHeader,
+      packetIdentifier.length + encodedTopic.length,
+      ...packetIdentifier,
+      ...encodedTopic,
+    ] as any,
+    "hex"
+  );
+  console.log("Sub Buffer", subscribeBuffer);
+  return subscribeBuffer;
+};
+
+/**
+ *
+ * @param packetIdentifier 2 byte identifier Received from subscribe. Pass it to unsub request.
+ * @param topic either string | string[] type. We should be able to unsubscribe from a single topic or multiple topics
+ */
+export const buildUnsubscribe = (
+  { packetIdentifier, topic }: InterfaceUnsubscribe,
+  fixedHeader: any
+) => {
+  let encodedUnsubTopic;
+  //type check for single or multi topics
+  if (typeof topic === "string") {
+    encodedUnsubTopic = [
+      0,
+      topic.length,
+      ...topic.split("").map((v) => v.charCodeAt(0)),
+    ];
+  } else {
+    encodedUnsubTopic = topic
+      .map((v) => [0, v.length, ...v.split("").map((v) => v.charCodeAt(0))])
+      .reduce((f, s) => [...f, ...s]);
+  }
+
+  let remainingLength = encodedUnsubTopic.length + packetIdentifier.length;
+  const buffer = Buffer.from([
+    fixedHeader,
+    remainingLength,
+    ...packetIdentifier,
+    ...encodedUnsubTopic,
+  ]);
+  console.log("Unsubscribe Buffer", buffer);
+  return buffer;
 };

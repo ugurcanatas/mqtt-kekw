@@ -22,7 +22,7 @@
 - [x] Implement <code>PINGREQ</code> Packet Types
 - [x] Implement filtering <code>PINGRESP</code>
 
-  - [] Emit event when <code>PINGRESP</code> happens
+  - [x] Emit event when <code>PINGRESP</code> happens
 
 - [] Implement <code>SUBSCRIBE</code> Packet Type
 
@@ -38,9 +38,11 @@
   - [x] Return packetID with emitted event as an argument
   - [] Add multiple topic check if client subscribed to multiple topics
 
-- [] Implement <code>UNSUBSCRIBE</code>
+- [x] Implement <code>UNSUBSCRIBE</code>
 
   - [x] Unsubbing from single and multiple topics tested.
+
+- [x] Implement <code>UNSUBACK</code> with event emitters.
 
 - [] Implement decoding received <code>PUBLISH</code> Packet from Broker
 
