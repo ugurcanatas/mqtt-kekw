@@ -4,7 +4,7 @@ dist
 lib
 
 src/test.ts
-rollup-test.config
+rollup-test.config.js
 tsconfig-test.json
 
 .env
