@@ -1,10 +1,11 @@
 node_modules/
 
-package-lock.json
-
 dist
+lib
 
-lib/test.ts
+src/test.ts
+rollup-test.config
+tsconfig-test.json
 
 .env
 

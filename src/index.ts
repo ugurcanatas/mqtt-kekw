@@ -6,7 +6,7 @@
  * @desc [description]
  */
 
-//Entry file
+//Entry fileasdasd
 import net from "net";
 import EventEmitter from "events";
 import TypedEmitter from "typed-emitter";
@@ -37,7 +37,7 @@ import {
   parsePubResponses,
 } from "./helpers/general-helpers.js";
 
-const kekw = (
+export const kekw = (
   { hostAddress = "localhost", port = 1883, timeout = 5000 }: TypeHostConfig,
   callbackFn: () => void,
   onFailed: (message: string) => void
@@ -284,5 +284,3 @@ const kekw = (
     sendPacket,
   };
 };
-
-export { kekw };
