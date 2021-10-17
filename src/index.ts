@@ -35,6 +35,7 @@ import {
   parseUnsubackData,
   buildPublish,
   parsePubResponses,
+  convertKeepAliveToHex,
 } from "./helpers/general-helpers.js";
 
 export const kekw = (
@@ -44,9 +45,6 @@ export const kekw = (
 ) => {
   let connected = false;
   let client = new net.Socket();
-  let keepAliveGlob = 120;
-  let messageReceived = false;
-  let customInterval: any = null;
   client.connect(port, hostAddress, callbackFn);
   let customEmiter = new EventEmitter() as TypedEmitter<InterfaceMessageEvents>;
   setTimeout(() => {
@@ -167,22 +165,29 @@ export const kekw = (
       willFlag: false,
       cleanSession: true,
     },
-    keepAlive = 0,
+    keepAlive = {
+      hours: 1,
+      minutes: 0,
+      seconds: 0,
+    },
     clientID = "mqttTestClient",
     will = {
       willTopic: "topic",
       willMessage: "message",
     },
   }: TypePacketConnect) => {
-    keepAliveGlob = keepAlive;
     //build fixed header
     const fixedHeader = buildFixedHeader({ type: controlPacketType });
     //build variable header
     const variableHeader = buildVariableHeader();
     //Check flags, convert binary array to decimal
     const connectFlags = buildConnectFlags(flags);
-    //Create keep alive array, change here later.
-    const keepAliveByte = [0, keepAlive];
+    //get keep alive 2 byte hex
+    const intervalHex = convertKeepAliveToHex({
+      hours: keepAlive?.hours,
+      minutes: keepAlive?.minutes,
+      seconds: keepAlive?.seconds,
+    });
 
     let clientPayload = [
       0,
@@ -206,20 +211,14 @@ export const kekw = (
         ]
       : [];
 
-    console.log("Testing so far ");
-    console.log("Fixed Header", fixedHeader);
-    console.log("Variable Header", variableHeader);
-    console.log("Connect Flags", connectFlags);
-    console.log("Client Payload ", clientPayload);
-
     let buffer = Buffer.from(
       [
         fixedHeader,
         //remaining length
-        keepAliveByte.length + variableHeader.length + clientPayload.length + 1,
+        intervalHex.length + variableHeader.length + clientPayload.length + 1,
         ...variableHeader,
         connectFlags,
-        ...keepAliveByte,
+        ...intervalHex,
         ...clientPayload,
       ] as any,
       "hex"

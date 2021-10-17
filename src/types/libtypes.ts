@@ -57,9 +57,15 @@ interface TypePacketConnect {
   controlPacketType: number;
   flags?: TypeConnectFlags;
   will?: TypeWill;
-  keepAlive?: number;
+  keepAlive?: TypeKeepAlive;
   clientID?: string;
 }
+
+type TypeKeepAlive = {
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+};
 
 type TypeConnectFlags = {
   username?: string;

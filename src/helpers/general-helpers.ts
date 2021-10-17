@@ -386,3 +386,37 @@ export const parsePubResponses = ({
   const [, , piMSB, piLSB] = response;
   return { packetID: [piMSB, piLSB] };
 };
+
+type Time = {
+  hours?: 0 | number;
+  minutes?: 0 | number;
+  seconds?: 0 | number;
+};
+
+/**
+ * Max Keep Alive: 18 hours 12 minutes 15 seconds
+ * @returns 2 byte hex
+ */
+export const convertKeepAliveToHex = ({
+  seconds = 0,
+  hours = 0,
+  minutes = 0,
+}: Time): Buffer => {
+  console.log("Received hours and minutes", hours, minutes, seconds);
+
+  if (hours > 18 && minutes > 12 && seconds > 15)
+    throw new Error("Maxiumum value of Keep Alive should be 18hh 12mm 15s");
+  let hToS = Math.abs(hours) * 3600;
+  let mToS = Math.abs(minutes) * 60;
+
+  let total = (hToS + mToS + Math.abs(seconds)).toString(16);
+  while (total.length < 4) {
+    total = `0${total}`;
+  }
+  let lsb = parseInt(total.slice(0, 2), 16);
+  let msb = parseInt(total.slice(2, total.length), 16);
+  console.log("Buffer Time", Buffer.from(total, "hex"));
+
+  return Buffer.from(total, "hex");
+  //return [lsb, msb];
+};

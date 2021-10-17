@@ -56,3 +56,12 @@
 - [] Reconnecting after tcp socket drops due to keep alive interval
 
 - [x] Add [typed-emitter](https://github.com/andywer/typed-emitter)
+
+- [] Tested functions
+
+  - [x] general-helpers/buildConnectFlags
+  - [x] general-helpers/buildVariableHeader
+  - [x] general-helpers/parseSubscribePacket
+  - [x] general-helpers/convertKeepAliveToHex
+
+- [] Add reconnect logic
