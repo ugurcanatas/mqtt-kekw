@@ -65,3 +65,5 @@
   - [x] general-helpers/convertKeepAliveToHex
 
 - [] Add reconnect logic
+
+- [] Random client name if it's not provided

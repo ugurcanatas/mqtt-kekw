@@ -401,7 +401,7 @@ export const convertKeepAliveToHex = ({
   seconds = 0,
   hours = 0,
   minutes = 0,
-}: Time): Buffer => {
+}: Time): number[] => {
   console.log("Received hours and minutes", hours, minutes, seconds);
 
   if (hours > 18 && minutes > 12 && seconds > 15)
@@ -415,8 +415,7 @@ export const convertKeepAliveToHex = ({
   }
   let lsb = parseInt(total.slice(0, 2), 16);
   let msb = parseInt(total.slice(2, total.length), 16);
-  console.log("Buffer Time", Buffer.from(total, "hex"));
 
-  return Buffer.from(total, "hex");
-  //return [lsb, msb];
+  //return Buffer.from(total, "hex");
+  return [lsb, msb];
 };
