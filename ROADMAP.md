@@ -36,7 +36,7 @@
 
   - [x] Emit an event when <code>SUBACK</code> happens
   - [x] Return packetID with emitted event as an argument
-  - [] Add multiple topic check if client subscribed to multiple topics
+  - [x] Add multiple topic check if client subscribed to multiple topics (Tested with three different topics)
 
 - [x] Implement <code>UNSUBSCRIBE</code>
 
@@ -48,9 +48,11 @@
 
   - [x] <code>PUBACK</code>
   - [x] <code>PUBREC</code>
-  - [] <code>PUBREL</code>
+  - [x] <code>PUBREL</code>
   - [] Check docs for missed parts
 
 - [] Use net module emitter instead of creating a new emitter.
+
+- [] Reconnecting after tcp socket drops due to keep alive interval
 
 - [x] Add [typed-emitter](https://github.com/andywer/typed-emitter)

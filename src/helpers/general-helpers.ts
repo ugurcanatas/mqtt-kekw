@@ -38,6 +38,12 @@ export const buildConnectFlags = ({
   willFlag,
   cleanSession,
 }: TypeConnectFlags) => {
+  if (username === "" || password === "") {
+    throw new Error("Username or password cannot be an empty string.");
+  }
+  if (willQoS_1 === 1 && willQoS_2 === 1) {
+    throw new Error("Will QoS bits cannot be set to 1 at the same time.");
+  }
   return parseInt(
     [
       username !== undefined ? 1 : 0,

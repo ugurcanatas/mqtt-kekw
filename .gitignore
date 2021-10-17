@@ -2,11 +2,14 @@ node_modules/
 
 dist
 lib
+__tests__
 
 src/test.ts
 rollup-test.config.js
 tsconfig-test.json
+jest.config.js
 
 .env
+.vscode
 
 NOTES.md

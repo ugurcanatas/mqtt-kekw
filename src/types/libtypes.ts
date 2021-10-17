@@ -118,6 +118,7 @@ interface InterfaceMessageEvents {
   puback: (payload: TypePubackPubrecPubrel) => void;
   pubrec: (payload: TypePubackPubrecPubrel) => void;
   pingresp: (payload: string) => void;
+  received: () => void;
 }
 
 export {

@@ -44,6 +44,9 @@ export const kekw = (
 ) => {
   let connected = false;
   let client = new net.Socket();
+  let keepAliveGlob = 120;
+  let messageReceived = false;
+  let customInterval: any = null;
   client.connect(port, hostAddress, callbackFn);
   let customEmiter = new EventEmitter() as TypedEmitter<InterfaceMessageEvents>;
   setTimeout(() => {
@@ -69,9 +72,10 @@ export const kekw = (
     throw new Error(error.message);
   });
 
-  client.on("close", (hadError: boolean) =>
-    customEmiter.emit("close", hadError)
-  );
+  client.on("close", (hadError: boolean) => {
+    connected = false;
+    customEmiter.emit("close", hadError);
+  });
 
   client.on("data", (data: Buffer) => {
     console.log("Data Received", data);
@@ -130,13 +134,27 @@ export const kekw = (
         console.log(
           `Topic received: ${topic} ### Payload received: ${payload}`
         );
-
+        //customEmiter.emit("received");
         break;
 
       default:
         break;
     }
   });
+
+  // customEmiter.on("received", () => {
+  //   console.log("Message Received");
+  //   customInterval && clearInterval(customInterval);
+  //   customInterval = setInterval(() => {
+  //     if (!connected) {
+  //       client.connect(port, hostAddress, callbackFn);
+  //     }
+  //     pingRequest({
+  //       type: CONTROL_PACKET_TYPES.PINGREQ,
+  //     });
+  //     console.log(`Ran every ${60 * 1000}`);
+  //   }, 60 * 1000);
+  // });
 
   const sendConnectPacket = ({
     controlPacketType,
@@ -149,13 +167,14 @@ export const kekw = (
       willFlag: false,
       cleanSession: true,
     },
-    keepAlive = 60,
+    keepAlive = 0,
     clientID = "mqttTestClient",
     will = {
       willTopic: "topic",
       willMessage: "message",
     },
   }: TypePacketConnect) => {
+    keepAliveGlob = keepAlive;
     //build fixed header
     const fixedHeader = buildFixedHeader({ type: controlPacketType });
     //build variable header
@@ -163,28 +182,28 @@ export const kekw = (
     //Check flags, convert binary array to decimal
     const connectFlags = buildConnectFlags(flags);
     //Create keep alive array, change here later.
-    const keepAliveByte = new Uint8Array([0, keepAlive]);
+    const keepAliveByte = [0, keepAlive];
 
-    let clientPayload = new Uint8Array([
+    let clientPayload = [
       0,
       clientID.length,
       ...clientID.split("").map((v) => v.charCodeAt(0)),
-    ]);
+    ];
 
     let willTopicPayload = flags.willFlag
-      ? new Uint8Array([
+      ? [
           0,
           will.willTopic.length,
           ...will.willTopic.split("").map((v) => v.charCodeAt(0)),
-        ])
+        ]
       : [];
 
     let willMessagePayload = flags.willFlag
-      ? new Uint8Array([
+      ? [
           0,
           will.willMessage.length,
           ...will.willMessage.split("").map((v) => v.charCodeAt(0)),
-        ])
+        ]
       : [];
 
     console.log("Testing so far ");
