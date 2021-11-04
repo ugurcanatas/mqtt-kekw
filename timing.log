@@ -2,21 +2,21 @@
 publishing data
    1
    
-   real	0m10.004s
+   real	0m10.013s
    user	0m0.001s
-   sys	0m0.002s
+   sys	0m0.006s
 =============================
 publishing data
    2
    
-   real	0m10.006s
+   real	0m10.004s
    user	0m0.001s
    sys	0m0.001s
 =============================
 publishing data
    3
    
-   real	0m10.007s
+   real	0m10.008s
    user	0m0.001s
    sys	0m0.001s
 =============================
@@ -30,84 +30,77 @@ publishing data
 publishing data
    5
    
-   real	0m10.007s
+   real	0m10.008s
    user	0m0.001s
    sys	0m0.001s
 =============================
 publishing data
    6
    
-   real	0m10.005s
-   user	0m0.001s
-   sys	0m0.002s
-=============================
-publishing data
-   7
-   
    real	0m10.008s
    user	0m0.001s
    sys	0m0.001s
 =============================
 publishing data
-   8
+   7
    
    real	0m10.006s
    user	0m0.001s
    sys	0m0.001s
 =============================
 publishing data
+   8
+   
+   real	0m10.007s
+   user	0m0.001s
+   sys	0m0.006s
+=============================
+publishing data
    9
    
-   real	0m10.003s
+   real	0m10.004s
    user	0m0.001s
-   sys	0m0.002s
+   sys	0m0.001s
 =============================
 publishing data
    10
    
-   real	0m10.003s
+   real	0m10.005s
    user	0m0.001s
    sys	0m0.001s
 =============================
 publishing data
    11
    
-   real	0m10.005s
+   real	0m10.007s
    user	0m0.001s
-   sys	0m0.001s
+   sys	0m0.002s
 =============================
 publishing data
    12
    
-   real	0m10.005s
+   real	0m10.007s
    user	0m0.001s
-   sys	0m0.002s
+   sys	0m0.001s
 =============================
 publishing data
    13
    
-   real	0m10.004s
+   real	0m10.006s
    user	0m0.001s
-   sys	0m0.002s
+   sys	0m0.001s
 =============================
 publishing data
    14
    
-   real	0m10.008s
+   real	0m10.006s
    user	0m0.001s
-   sys	0m0.001s
+   sys	0m0.002s
 =============================
 publishing data
    15
    
-   real	0m10.008s
-   user	0m0.001s
-   sys	0m0.001s
-=============================
-publishing data
-   16
-   
-   real	0m10.005s
+   real	0m10.007s
    user	0m0.001s
    sys	0m0.001s
 =============================

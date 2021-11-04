@@ -184,15 +184,14 @@ export const buildFixedHeader = ({ type }: { type: number }) => {
  *
  * @returns
  */
-export const parseSubackData = ({ data }: { data: Buffer }): TypeSuback => {
-  const { data: bufferData } = data.toJSON();
+export const parseSubackData = ({ data }: { data: number[] }): TypeSuback => {
   //console.log("Buffer To JSON", bufferData);
   // first one is fixedHeader, second is remainingLength.
-  const [, , piMSB, piLSB] = bufferData;
+  const [, , piMSB, piLSB] = data;
 
-  let returnCodes = [];
-  for (let index = 4; index < bufferData.length; index++) {
-    const returnType = bufferData[index];
+  let returnCodes: any[] = [];
+  for (let index = 4; index < data.length; index++) {
+    const returnType = data[index];
     returnCodes.push(SUBACK_RETURN_TYPES[returnType]);
   }
 
@@ -202,9 +201,12 @@ export const parseSubackData = ({ data }: { data: Buffer }): TypeSuback => {
   };
 };
 
-export const parseUnsubackData = ({ data }: { data: Buffer }): TypeUnsuback => {
-  const { data: bufferData } = data.toJSON();
-  const [, , piMSB, piLSB] = bufferData;
+export const parseUnsubackData = ({
+  data,
+}: {
+  data: number[];
+}): TypeUnsuback => {
+  const [, , piMSB, piLSB] = data;
   return {
     packetID: [piMSB, piLSB],
   };
@@ -380,10 +382,9 @@ export const buildPublish = (
 export const parsePubResponses = ({
   data,
 }: {
-  data: Buffer;
+  data: number[];
 }): TypePubackPubrecPubrel => {
-  const { data: response } = data.toJSON();
-  const [, , piMSB, piLSB] = response;
+  const [, , piMSB, piLSB] = data;
   return { packetID: [piMSB, piLSB] };
 };
 

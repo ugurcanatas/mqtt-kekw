@@ -5,9 +5,15 @@ lib
 __tests__
 
 src/test.ts
+src/classtest.ts
+src/connection
 rollup-test.config.js
+rollup-classtest.config.js
 tsconfig-test.json
 jest.config.js
+first-draft*
+
+timing.log
 
 .env
 .vscode

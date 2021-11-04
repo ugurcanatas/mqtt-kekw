@@ -1,3 +1,3 @@
-## MQTT JS CLIENT
+# MQTT KEKW
 
-This is a javascript client that generates MQTT packets and sends those packets using TCP & WebSocket. More later...
+MQTT Kekw is a Javascript MQTT client built using Node.js

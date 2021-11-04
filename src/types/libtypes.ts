@@ -6,7 +6,7 @@
  * @desc [description]
  */
 
-type TypeHostConfig = {
+interface TypeHostConfig {
   hostAddress?: string;
   port?: number;
   /**
@@ -16,7 +16,8 @@ type TypeHostConfig = {
    * Default set to 5000ms in parameters
    */
   timeout?: number;
-};
+  type?: "ws" | "tcp";
+}
 /**
  * TypePacketConfig
  * @alias TypePacketConfig
@@ -33,6 +34,12 @@ type TypePacketConfig = {
     | TypePacketConnect
     | InterfaceUnsubscribe;
 };
+
+type IPacketType =
+  | InterfacePublish
+  | InterfaceSubscribe
+  | TypePacketConnect
+  | InterfaceUnsubscribe;
 
 interface InterfacePublish {
   topic: string; // indicates publish topic
@@ -55,6 +62,13 @@ interface InterfaceUnsubscribe {
 
 interface TypePacketConnect {
   controlPacketType: number;
+  flags?: TypeConnectFlags;
+  will?: TypeWill;
+  keepAlive?: TypeKeepAlive;
+  clientID?: string;
+}
+
+interface InterfacePacketConnect {
   flags?: TypeConnectFlags;
   will?: TypeWill;
   keepAlive?: TypeKeepAlive;
@@ -105,6 +119,8 @@ interface InterfaceMessageEvents {
   ready: () => void;
   error: (error: Error) => void;
   close: (hadError: boolean) => void;
+  end: () => void;
+  timeout: () => void;
   connectionAccepted: ({
     returnCode,
     message,
@@ -124,7 +140,7 @@ interface InterfaceMessageEvents {
   puback: (payload: TypePubackPubrecPubrel) => void;
   pubrec: (payload: TypePubackPubrecPubrel) => void;
   pingresp: (payload: string) => void;
-  received: () => void;
+  received: ({ topic, payload }: { topic: string; payload: string }) => void;
 }
 
 export {
@@ -137,8 +153,10 @@ export {
   TypeSubackReturnCodes,
   TypeUnsuback,
   TypePubackPubrecPubrel,
+  InterfacePacketConnect,
   InterfaceMessageEvents,
   InterfacePublish,
   InterfaceSubscribe,
   InterfaceUnsubscribe,
+  IPacketType,
 };
