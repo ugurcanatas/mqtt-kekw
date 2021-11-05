@@ -63,39 +63,57 @@ client.on("ready", () => {
 - **Description**: Sends a Connection packet to the broker
 
   - **Properties**:
-  - > `flags`:
+  - `flags`:
 
     - **Type**: `Object`
     - **Description**: Consists of connection flag properties
     - **Properties**:
 
-      > `username`
+      - `username`
 
-      - **Type**: `string | undefined`
+        > **Type**: `string | undefined`
 
-      > `password`
+      - `password`
 
-      - **Type**: `string | undefined`
+        > **Type**: `string | undefined`
 
-      > `willRetain`
+      - `willRetain`
 
-      - **Type**: `boolean`
+        > **Type**: `boolean`
 
-      > `willQoS_1`
+      - `willQoS_1`
 
-      - **Type**: `boolean`
+        > **Type**: `boolean`
 
-      > `willQoS_2`
+      - `willQoS_2`
 
-      - **Type**: `boolean`
+        > **Type**: `boolean`
 
-      > `willFlag`
+      - `willFlag`
 
-      - **Type**: `boolean`
+        > **Type**: `boolean`
 
-      > `cleanSession`
+      - `cleanSession`
 
-      - **Type**: `boolean`
+        > **Type**: `boolean`
+
+  - `keepAlive`:
+
+    - **Type**: `Object`
+    - **Description**: Keep alive value consists of hours, minutes and seconds
+    - **Properties**:
+
+      - `hours`
+
+        > **Type**: `number`
+
+      - `minutes`
+
+        > **Type**: `number`
+
+      - `seconds`
+
+        > **Type**: `number`
 
 ## Emitted events
 
