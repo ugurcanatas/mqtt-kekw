@@ -46,6 +46,8 @@ const client = new kekwClient(
 
 <p>Send connection packet after TCP connection is <b>ready</b></p>
 
+### Example usage
+
 ```javascript
 client.on("ready", () => {
   console.log("Client Ready !!");
@@ -54,6 +56,46 @@ client.on("ready", () => {
   });
 });
 ```
+
+<code>connectionUp</code>
+
+- **Type**: `function`
+- **Description**: Sends a Connection packet to the broker
+
+  - **Properties**:
+  - > `flags`:
+
+    - **Type**: `Object`
+    - **Description**: Consists of connection flag properties
+    - **Properties**:
+
+      > `username`
+
+      - **Type**: `string | undefined`
+
+      > `password`
+
+      - **Type**: `string | undefined`
+
+      > `willRetain`
+
+      - **Type**: `boolean`
+
+      > `willQoS_1`
+
+      - **Type**: `boolean`
+
+      > `willQoS_2`
+
+      - **Type**: `boolean`
+
+      > `willFlag`
+
+      - **Type**: `boolean`
+
+      > `cleanSession`
+
+      - **Type**: `boolean`
 
 ## Emitted events
 
@@ -88,7 +130,7 @@ client.on("connect", () => {
 
 ### Ready
 
-Emitted after client is connected broker is ready to receive packets
+Emitted after broker is ready to receive packets
 
 ```javascript
 client.on("ready", () => {
