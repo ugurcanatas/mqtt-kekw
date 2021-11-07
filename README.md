@@ -7,7 +7,7 @@ MQTT Kekw is a Node.js MQTT TCP client.
 ## Example usage
 
 ```javascript
-const { kekwClient } = require("mqtt-kekw");
+const { kekwClient } = require("@mqtt-kekw/tcp-client");
 
 const client = new kekwClient(
   { hostAddress: "localhost", port: 1883 },
@@ -102,22 +102,22 @@ client.on("ready", () => {
 
 Events emitted with Node.js EventEmitter class. All events are created by following Oasis spesification [@Docs-Oasis](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html)
 
-| Event Name                                             | Description                                                           | Args & Types                                 |
-| :----------------------------------------------------- | :-------------------------------------------------------------------- | -------------------------------------------- |
-| [connect](./docs/events#connect)                       | `TCP connection starts`                                               | ---                                          |
-| [ready](./docs/events#ready)                           | `TCP connection ready`                                                | ---                                          |
-| [close](./docs/events#close)                           | `TCP connection closed`                                               | hadError: `boolean`                          |
-| [end](./docs/events#end)                               | `TCP connection ended`                                                | ---                                          |
-| [error](./docs/events#error)                           | `TCP connection error`                                                | error: `Error`                               |
-| [timeout](./docs/events#timeout)                       | `TCP timeout`                                                         | ---                                          |
-| [connectionAccepted](./docs/events#connectionaccepted) | `Connection acknowledged by the Broker`                               | {returnCode: `string`, message: `string`}    |
-| [connectionRefused](./docs/events#connectionrefused)   | `Connection did not acknowledged by the Broker`                       | {returnCode: `string`, message: `string`}    |
-| [pingresp](./docs/events#pingresp)                     | `Broker pinged back`                                                  | message:`string`                             |
-| [suback](./docs/events#suback)                         | `Subscribe acknowledged by the Broker`                                | {returnCodes: `any[]`, packetID: `number[]`} |
-| [unsuback](./docs/events#unsuback)                     | `Unsubscribe acknowledged by the Broker`                              | {packetID: `number[]`}                       |
-| puback                                                 | `Publish acknowledged by the Broker(QoS = 1, At least once delivery)` | {packetID: `number[]`}                       |
-| pubrec                                                 | `Publish acknowledged by the Broker(QoS = 2, At most once delivery)`  | {packetID: `number[]`}                       |
-| received                                               | `Message from the Broker received`                                    | {topic: `string`, payload: `string`}         |
+| Event Name                                                | Description                                                           | Args & Types                                 |
+| :-------------------------------------------------------- | :-------------------------------------------------------------------- | -------------------------------------------- |
+| [connect](./docs/EVENTS.md#connect)                       | `TCP connection starts`                                               | ---                                          |
+| [ready](./docs/EVENTS.md#ready)                           | `TCP connection ready`                                                | ---                                          |
+| [close](./docs/EVENTS.md#close)                           | `TCP connection closed`                                               | hadError: `boolean`                          |
+| [end](./docs/EVENTS.md#end)                               | `TCP connection ended`                                                | ---                                          |
+| [error](./docs/EVENTS.md#error)                           | `TCP connection error`                                                | error: `Error`                               |
+| [timeout](./docs/EVENTS.md#timeout)                       | `TCP timeout`                                                         | ---                                          |
+| [connectionAccepted](./docs/EVENTS.md#connectionaccepted) | `Connection acknowledged by the Broker`                               | {returnCode: `string`, message: `string`}    |
+| [connectionRefused](./docs/EVENTS.md#connectionrefused)   | `Connection did not acknowledged by the Broker`                       | {returnCode: `string`, message: `string`}    |
+| [pingresp](./docs/EVENTS.md#pingresp)                     | `Broker pinged back`                                                  | message:`string`                             |
+| [suback](./docs/EVENTS.md#suback)                         | `Subscribe acknowledged by the Broker`                                | {returnCodes: `any[]`, packetID: `number[]`} |
+| [unsuback](./docs/EVENTS.md#unsuback)                     | `Unsubscribe acknowledged by the Broker`                              | {packetID: `number[]`}                       |
+| puback                                                    | `Publish acknowledged by the Broker(QoS = 1, At least once delivery)` | {packetID: `number[]`}                       |
+| pubrec                                                    | `Publish acknowledged by the Broker(QoS = 2, At most once delivery)`  | {packetID: `number[]`}                       |
+| received                                                  | `Message from the Broker received`                                    | {topic: `string`, payload: `string`}         |
 
 ## Functions
 
@@ -139,46 +139,89 @@ Events emitted with Node.js EventEmitter class. All events are created by follow
 
 - ### <code>subscribeTo({topic,requestedQoS})</code>
 
-**Description:** Sends a subscribe packet to the broker with topic or topics and requestedQoS. Client should receive **suback** packet.
+  **Description:** Sends a subscribe packet to the broker with topic or topics and requestedQoS. Client should receive **suback** packet.
 
-**Arguments:**
+  **Arguments:**
 
-`topic`:
+  `topic`:
 
-- **Type**: string | string[]
-- **Description**: Topic can be a string or a array of strings. Payload calculated accordingly
+  - **Type**: string | string[]
+  - **Description**: Topic can be a string or a array of strings. Payload calculated accordingly
 
-`requestedQoS`:
+  `requestedQoS`:
 
-- **Type**: number (either 0 or 1)
-- **Description**: Requested QoS.(more later)
+  - **Type**: number (either 0 or 1)
+  - **Description**: Requested QoS.(more later)
 
-```javascript
-client.subscribeTo({
-  topic: "home/+/humidity",
-  requestedQoS: 0,
-});
-```
+  ```javascript
+  client.subscribeTo({
+    topic: "home/+/humidity",
+    requestedQoS: 0,
+  });
+  ```
 
 - ### <code>unsubscribeFrom({topic,requestedQoS})</code>
 
-**Description:** Sends an unsubscribe packet to the broker with topic or topics and requestedQoS. Client should receive **unsuback** packet.
+  **Description:** Sends an unsubscribe packet to the broker with topic or topics and requestedQoS. Client should receive **unsuback** packet.
 
-**Arguments:**
+  **Arguments:**
 
-`topic`:
+  `topic`:
 
-- **Type**: string | string[]
-- **Description**: Topic can be a string or a array of strings. Payload calculated accordingly
+  - **Type**: string | string[]
+  - **Description**: Topic can be a string or a array of strings. Payload calculated accordingly
 
-`requestedQoS`:
+  `packetIdentifier`:
 
-- **Type**: number (either 0 or 1)
-- **Description**: Requested QoS.(more later)
+  - **Type**: number[]
+  - **Description**: Packet identifier should be same as the packet identifier that client received in `suback` event
 
-```javascript
-client.unsubscribeFrom({
-  topic: "home/+",
-  packetIdentifier,
-});
-```
+  ```javascript
+  client.unsubscribeFrom({
+    topic: "home/+",
+    packetIdentifier,
+  });
+  ```
+
+- ### <code>publishTo({topic,message,dupFlag,QoS1,QoS2,retain})</code>
+
+  **Description:** Sends a publish packet to the broker with necessarry arguments. Client should received **puback** or **pubrec** accordingly.
+
+  **Arguments:**
+
+  `topic`:
+
+  - **Type**: string
+  - **Description**: Topic is a string. Defines which topic that message will be published to
+
+  `message`:
+
+  - **Type**: string
+  - **Description**: Message data with the related topic
+
+  `dupFlag`:
+
+  - **Type**: number
+  - **Description**: Duplication flag should be set to 0 if it's first occasion. If it's a duplication, it should be set to 1
+
+  `QoS1`:
+
+  - **Type**: number
+  - **Description**: ...
+
+  `QoS2`:
+
+  - **Type**: number
+  - **Description**: ...
+
+  `retain`:
+
+  - **Type**: number
+  - **Description**: ...
+
+  ```javascript
+  client.unsubscribeFrom({
+    topic: "home/+",
+    packetIdentifier,
+  });
+  ```

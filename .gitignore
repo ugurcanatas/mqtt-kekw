@@ -11,6 +11,7 @@ rollup-classtest.config.js
 tsconfig-test.json
 jest.config.js
 first-draft*
+lib
 
 timing.log
 

@@ -403,9 +403,7 @@ export const convertKeepAliveToHex = ({
   hours = 0,
   minutes = 0,
 }: Time): number[] => {
-  console.log("Received hours and minutes", hours, minutes, seconds);
-
-  if (hours > 18 && minutes > 12 && seconds > 15)
+  if (hours > 18 && (minutes > 12 || seconds > 15))
     throw new Error("Maxiumum value of Keep Alive should be 18hh 12mm 15s");
   let hToS = Math.abs(hours) * 3600;
   let mToS = Math.abs(minutes) * 60;
@@ -414,9 +412,24 @@ export const convertKeepAliveToHex = ({
   while (total.length < 4) {
     total = `0${total}`;
   }
-  let lsb = parseInt(total.slice(0, 2), 16);
-  let msb = parseInt(total.slice(2, total.length), 16);
 
-  //return Buffer.from(total, "hex");
-  return [lsb, msb];
+  const msb = parseInt(total.slice(0, 2), 16);
+  const lsb = parseInt(total.slice(2, total.length), 16);
+
+  return [msb, lsb];
+};
+
+export const fieldWithSize = (payload: string) => {
+  let total = payload.length.toString(16);
+
+  while (total.length < 4) {
+    total = `0${total}`;
+  }
+
+  const msb = parseInt(total.slice(0, 2), 16);
+  const lsb = parseInt(total.slice(2, total.length), 16);
+
+  //console.log([msb, lsb, ...payload.split("").map((v) => v.charCodeAt(0))]);
+
+  return [msb, lsb, ...payload.split("").map((v) => v.charCodeAt(0))];
 };
