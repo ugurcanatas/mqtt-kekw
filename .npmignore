@@ -9,3 +9,5 @@ src/connection
 .vscode
 
 first-draft*
+
+__tests__

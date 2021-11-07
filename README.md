@@ -7,7 +7,7 @@ MQTT Kekw is a Node.js MQTT TCP client.
 ## Example usage
 
 ```javascript
-const kekwClient = require("mqtt-kekw");
+const { kekwClient } = require("mqtt-kekw");
 
 const client = new kekwClient(
   { hostAddress: "localhost", port: 1883 },
@@ -62,58 +62,41 @@ client.on("ready", () => {
 - **Type**: `function`
 - **Description**: Sends a Connection packet to the broker
 
-  - **Properties**:
-  - `flags`:
+- **Arguments**:
 
-    - **Type**: `Object`
-    - **Description**: Consists of connection flag properties
-    - **Properties**:
+- `flags`:
+- **Type:** `object`
+- **Description:** Consists of following
+  | Name | Type | Description |
+  | :--- | :---- | :--- |
+  | username | `string` | If username exists, it will be present in the payload |
+  | password | `string` | If password exists, it will be present in the payload |
+  | willFlag | `boolean` | ...more |
+  | willQoS_1 | `number` | ...more |
+  | willQoS_2 | `number` | ...more |
+  | willRetain | `boolean` | ...more |
+  | cleanSession | `boolean` | If cleanSession is set to 0, resume communications with the client based on state from the current Session |
 
-      - `username`
+- `clientID`:
+- **Type:** `string`
+- **Description:** Client Identifier string. Part of the payload packet
 
-        > **Type**: `string | undefined`
+- `keepAlive`:
+- **Type:** `object`
+- **Description:** How much longer should connection stay open between client and broker
+  | Name | Type | Description |
+  | :--- | :---- | :--- |
+  | hours | number | hours in number (0-23) |
+  | minutes | number | minutes in number (0-60) |
+  | seconds | number | seconds in number (0-60) |
 
-      - `password`
-
-        > **Type**: `string | undefined`
-
-      - `willRetain`
-
-        > **Type**: `boolean`
-
-      - `willQoS_1`
-
-        > **Type**: `boolean`
-
-      - `willQoS_2`
-
-        > **Type**: `boolean`
-
-      - `willFlag`
-
-        > **Type**: `boolean`
-
-      - `cleanSession`
-
-        > **Type**: `boolean`
-
-  - `keepAlive`:
-
-    - **Type**: `Object`
-    - **Description**: Keep alive value consists of hours, minutes and seconds
-    - **Properties**:
-
-      - `hours`
-
-        > **Type**: `number`
-
-      - `minutes`
-
-        > **Type**: `number`
-
-      - `seconds`
-
-        > **Type**: `number`
+- `will`:
+- **Type:** `object`
+- **Description:** Specify will topic and will message if willFlag is set to true
+  | Name | Type | Description |
+  | :--- | :---- | :--- |
+  | willTopic | string | Will Topic |
+  | willMessage | string | Will Message |
 
 ## Emitted events
 

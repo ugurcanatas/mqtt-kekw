@@ -3,8 +3,8 @@
  * Gerard O'Neill
  */
 //import peerDepsExternal from "rollup-plugin-peer-deps-external";
-//import resolve from "@rollup/plugin-node-resolve";
-//import commonjs from "@rollup/plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 import typescript from "rollup-plugin-typescript2";
 import pkg from "./package.json";
 
@@ -14,10 +14,12 @@ export default {
     {
       file: pkg.main,
       format: "cjs",
+      //exports: "default",
     },
     {
       file: pkg.module,
       format: "es",
+      //exports: "default",
     },
   ],
   external: [
@@ -25,11 +27,11 @@ export default {
     ...Object.keys(pkg.peerDependencies || {}),
   ],
   plugins: [
+    //Check later
+    commonjs(),
+    resolve(),
     typescript({
       typescript: require("typescript"),
     }),
-    //Check later
-    //resolve(),
-    //commonjs(),
   ],
 };

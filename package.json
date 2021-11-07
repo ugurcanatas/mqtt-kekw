@@ -1,5 +1,5 @@
 {
-  "name": "mqtt-kekw",
+  "name": "@mqtt-kekw/tcp-client",
   "version": "1.0.0",
   "description": "A Node.js client that uses MQTT pub/sub model with a TCP Socket",
   "main": "lib/index.js",
