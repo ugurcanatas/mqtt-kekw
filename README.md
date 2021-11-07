@@ -64,7 +64,7 @@ client.on("ready", () => {
 
 - **Arguments**:
 
-- `flags`:
+- `flags` (optional):
 - **Type:** `object`
 - **Description:** Consists of following
   | Name | Type | Description |
@@ -77,11 +77,11 @@ client.on("ready", () => {
   | willRetain | `boolean` | ...more |
   | cleanSession | `boolean` | If cleanSession is set to 0, resume communications with the client based on state from the current Session |
 
-- `clientID`:
+- `clientID` (optional):
 - **Type:** `string`
 - **Description:** Client Identifier string. Part of the payload packet
 
-- `keepAlive`:
+- `keepAlive` (optional)::
 - **Type:** `object`
 - **Description:** How much longer should connection stay open between client and broker
   | Name | Type | Description |
@@ -102,54 +102,83 @@ client.on("ready", () => {
 
 Events emitted with Node.js EventEmitter class. All events are created by following Oasis spesification [@Docs-Oasis](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html)
 
-| Event Name          | Description                                                           | Args & Types                                 |
-| :------------------ | :-------------------------------------------------------------------- | -------------------------------------------- |
-| [connect](#connect) | `TCP connection starts`                                               | ---                                          |
-| [ready](#ready)     | `TCP connection ready`                                                | ---                                          |
-| [close](#close)     | `TCP connection closed`                                               | hadError: `boolean`                          |
-| end                 | `TCP connection ended`                                                | ---                                          |
-| error               | `TCP connection error`                                                | error: `Error`                               |
-| timeout             | `TCP timeout`                                                         | ---                                          |
-| connectionAccepted  | `Connection acknowledged by the Broker`                               | {returnCode: `string`, message: `string`}    |
-| connectionRefused   | `Connection did not acknowledged by the Broker`                       | {returnCode: `string`, message: `string`}    |
-| pingresp            | `Broker pinged back`                                                  | message:`string`                             |
-| suback              | `Subscribe acknowledged by the Broker`                                | {returnCodes: `any[]`, packetID: `number[]`} |
-| unsuback            | `Unsubscribe acknowledged by the Broker`                              | {packetID: `number[]`}                       |
-| puback              | `Publish acknowledged by the Broker(QoS = 1, At least once delivery)` | {packetID: `number[]`}                       |
-| pubrec              | `Publish acknowledged by the Broker(QoS = 2, At most once delivery)`  | {packetID: `number[]`}                       |
-| received            | `Message from the Broker received`                                    | {topic: `string`, payload: `string`}         |
+| Event Name                                             | Description                                                           | Args & Types                                 |
+| :----------------------------------------------------- | :-------------------------------------------------------------------- | -------------------------------------------- |
+| [connect](./docs/events#connect)                       | `TCP connection starts`                                               | ---                                          |
+| [ready](./docs/events#ready)                           | `TCP connection ready`                                                | ---                                          |
+| [close](./docs/events#close)                           | `TCP connection closed`                                               | hadError: `boolean`                          |
+| [end](./docs/events#end)                               | `TCP connection ended`                                                | ---                                          |
+| [error](./docs/events#error)                           | `TCP connection error`                                                | error: `Error`                               |
+| [timeout](./docs/events#timeout)                       | `TCP timeout`                                                         | ---                                          |
+| [connectionAccepted](./docs/events#connectionaccepted) | `Connection acknowledged by the Broker`                               | {returnCode: `string`, message: `string`}    |
+| [connectionRefused](./docs/events#connectionrefused)   | `Connection did not acknowledged by the Broker`                       | {returnCode: `string`, message: `string`}    |
+| [pingresp](./docs/events#pingresp)                     | `Broker pinged back`                                                  | message:`string`                             |
+| [suback](./docs/events#suback)                         | `Subscribe acknowledged by the Broker`                                | {returnCodes: `any[]`, packetID: `number[]`} |
+| [unsuback](./docs/events#unsuback)                     | `Unsubscribe acknowledged by the Broker`                              | {packetID: `number[]`}                       |
+| puback                                                 | `Publish acknowledged by the Broker(QoS = 1, At least once delivery)` | {packetID: `number[]`}                       |
+| pubrec                                                 | `Publish acknowledged by the Broker(QoS = 2, At most once delivery)`  | {packetID: `number[]`}                       |
+| received                                               | `Message from the Broker received`                                    | {topic: `string`, payload: `string`}         |
 
-### Connect
+## Functions
 
-Emitted after client is connected to the broker.
+- ### <code>ping</code>
+
+  ```javascript
+  client.ping();
+  ```
+
+  **Description:** Sends a ping packet to the broker. `pingresp` should be triggered after client receives a ping back data packet.
+
+- ### <code>disconnect</code>
+
+  ```javascript
+  client.disconnect();
+  ```
+
+  **Description:** Sends a disconnect packet to the broker. Client closes it's connection after receiving disconnect acknowledgement packet.
+
+- ### <code>subscribeTo({topic,requestedQoS})</code>
+
+**Description:** Sends a subscribe packet to the broker with topic or topics and requestedQoS. Client should receive **suback** packet.
+
+**Arguments:**
+
+`topic`:
+
+- **Type**: string | string[]
+- **Description**: Topic can be a string or a array of strings. Payload calculated accordingly
+
+`requestedQoS`:
+
+- **Type**: number (either 0 or 1)
+- **Description**: Requested QoS.(more later)
 
 ```javascript
-client.on("connect", () => {
-  console.log("Client Connected !!");
+client.subscribeTo({
+  topic: "home/+/humidity",
+  requestedQoS: 0,
 });
 ```
 
-### Ready
+- ### <code>unsubscribeFrom({topic,requestedQoS})</code>
 
-Emitted after broker is ready to receive packets
+**Description:** Sends an unsubscribe packet to the broker with topic or topics and requestedQoS. Client should receive **unsuback** packet.
 
-```javascript
-client.on("ready", () => {
-  console.log("Client Ready !!");
-});
-```
+**Arguments:**
 
-### Close
+`topic`:
 
-Emitted after connection closed.
+- **Type**: string | string[]
+- **Description**: Topic can be a string or a array of strings. Payload calculated accordingly
 
-<code>hadError</code>
+`requestedQoS`:
 
-- **Type**: `boolean`
-- **Description**: If connection closed because of an error or not.
+- **Type**: number (either 0 or 1)
+- **Description**: Requested QoS.(more later)
 
 ```javascript
-client.on("close", (hadError) => {
-  console.log("Client Connection Closed !!");
+client.unsubscribeFrom({
+  topic: "home/+",
+  packetIdentifier,
 });
 ```
