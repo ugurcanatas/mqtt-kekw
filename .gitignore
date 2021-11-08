@@ -9,7 +9,7 @@ src/connection
 rollup-test.config.js
 rollup-classtest.config.js
 tsconfig-test.json
-jest.config.js
+#jest.config.js
 first-draft*
 lib/*
 
