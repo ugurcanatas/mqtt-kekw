@@ -83,7 +83,7 @@ client.on("ready", () => {
 
 - `keepAlive` (optional)::
 - **Type:** `object`
-- **Description:** How much longer should connection stay open between client and broker
+- **Description:** How much longer should connection stay open between client and broker. Keep in mind that mosquitto broker adds +15 seconds to keepAlive
   | Name | Type | Description |
   | :--- | :---- | :--- |
   | hours | number | hours in number (0-23) |
@@ -178,7 +178,7 @@ Events emitted with Node.js EventEmitter class. All events are created by follow
 
   ```javascript
   client.unsubscribeFrom({
-    topic: "home/+",
+    topic: "home/+/humidity",
     packetIdentifier,
   });
   ```
@@ -221,7 +221,63 @@ Events emitted with Node.js EventEmitter class. All events are created by follow
 
   ```javascript
   client.unsubscribeFrom({
-    topic: "home/+",
+    topic: "home",
     packetIdentifier,
   });
   ```
+
+## Subscribe & Unsubscribe Example
+
+### Single-Level Wildcard `'+'`
+
+Example topics
+
+- home/room1/temperature
+- home/room2/temperature
+- home/room3/temperature
+
+**Example usage**
+Subscribe to all topics with `home/${any_topic}/temperature` format
+
+```javascript
+client.subscribeTo({
+  topic: "home/+/temperature",
+  //requestedQoS: 0,
+});
+```
+
+If you want to unsubscribe from a single level wildcard
+
+```javascript
+client.unsubscribeFrom({
+  topic: "home/+/temperature",
+  //requestedQoS: 0,
+});
+```
+
+### Multi-Level Wildcard `'#'`
+
+Example topics
+
+- home/room1/temperature
+- home/room1/humidity
+- home/room1/voltage
+
+**Example usage**
+Subscribe to all topics with `home/room1/${any_topic}` format
+
+```javascript
+client.subscribeTo({
+  topic: "home/room1/#",
+  //requestedQoS: 0,
+});
+```
+
+If you want to unsubscribe from a multi level wildcard
+
+```javascript
+client.unsubscribeFrom({
+  topic: "home/room1/#",
+  //requestedQoS: 0,
+});
+```

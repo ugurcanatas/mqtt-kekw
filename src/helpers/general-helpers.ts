@@ -231,9 +231,7 @@ export const buildSubscribe = (
   if (typeof topic === "string") {
     //single topic
     encodedTopic = [
-      0,
-      topic.length,
-      ...topic.split("").map((v) => v.charCodeAt(0)),
+      ...fieldWithSize(topic), //msb, lsb, topic encoded
       requestedQoS, //Requested QOS
     ];
     console.log("Subscribe packet is => ", encodedTopic);
@@ -241,21 +239,23 @@ export const buildSubscribe = (
     //array of topics. loop
     encodedTopic = topic
       .map((v) => [
-        0,
-        v.length,
-        ...v.split("").map((v) => v.charCodeAt(0)),
+        ...fieldWithSize(v), //msb, lsb, topic encoded
         requestedQoS,
       ])
       .reduce((f, s) => [...f, ...s]);
   }
   //packet identifier at variable header.
-  const packetIdentifier = [0, 16];
+  const packetId = randomize("packetID");
+  const packetIdArray = fieldWithSize(packetId);
+  //console.log("Packet Identifier", packetIdArray);
+  const remLength = encodedTopic.length + 2; // + 2 is from packetIdentifier. Its two bytes.
 
   const subscribeBuffer = Buffer.from(
     [
       fixedHeader,
-      packetIdentifier.length + encodedTopic.length,
-      ...packetIdentifier,
+      remLength,
+      packetIdArray[0],
+      packetIdArray[1],
       ...encodedTopic,
     ] as any,
     "hex"
@@ -401,7 +401,7 @@ type Time = {
 export const convertKeepAliveToHex = ({
   seconds = 0,
   hours = 0,
-  minutes = 0,
+  minutes = 10,
 }: Time): number[] => {
   if (hours > 18 && (minutes > 12 || seconds > 15))
     throw new Error("Maxiumum value of Keep Alive should be 18hh 12mm 15s");
@@ -432,4 +432,8 @@ export const fieldWithSize = (payload: string) => {
   //console.log([msb, lsb, ...payload.split("").map((v) => v.charCodeAt(0))]);
 
   return [msb, lsb, ...payload.split("").map((v) => v.charCodeAt(0))];
+};
+
+export const randomize = (prefix: string) => {
+  return `${prefix}_${(Math.random() + 1).toString(16).substring(8)}`;
 };

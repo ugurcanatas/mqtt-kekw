@@ -123,9 +123,10 @@ export class kekwClient extends (EventEmitter as new () => TypedEmitter<Interfac
               });
               break;
             default:
+              this.connected = false;
               this.emit("connectionRefused", {
                 returnCode: CONNACK_ERROR_MESSAGES[data[3]].returnCode,
-                message: CONNACK_ERROR_MESSAGES[0].description,
+                message: CONNACK_ERROR_MESSAGES[data[3]].description,
               });
               break;
           }
