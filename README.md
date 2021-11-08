@@ -6,6 +6,14 @@ MQTT Kekw is a Node.js MQTT TCP client.
 
 ## Example usage
 
+### Install
+
+```bash
+npm i @mqtt-kekw/tcp-client
+```
+
+### Use
+
 ```javascript
 const { kekwClient } = require("@mqtt-kekw/tcp-client");
 
@@ -264,6 +272,7 @@ Example topics
 - home/room1/voltage
 
 **Example usage**
+
 Subscribe to all topics with `home/room1/${any_topic}` format
 
 ```javascript
@@ -279,5 +288,23 @@ If you want to unsubscribe from a multi level wildcard
 client.unsubscribeFrom({
   topic: "home/room1/#",
   //requestedQoS: 0,
+});
+```
+
+### Subscribe to multiple topics
+
+```javascript
+client.subscribeTo({
+  topic: ["home/room1/temperature", "home/room1/temperature"],
+  //requestedQoS: 0,
+});
+```
+
+### Unsubscribe from multiple topics
+
+```javascript
+client.unsubscribeFrom({
+  topic: ["home/room1/temperature", "home/room1/temperature"],
+  //packetIdentifier here
 });
 ```

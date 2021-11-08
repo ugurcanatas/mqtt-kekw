@@ -35,6 +35,7 @@ import {
   parsePubResponses,
   convertKeepAliveToHex,
   fieldWithSize,
+  randomize,
 } from "./helpers/general-helpers.js";
 
 export class kekwClient extends (EventEmitter as new () => TypedEmitter<InterfaceMessageEvents>) {
@@ -172,10 +173,6 @@ export class kekwClient extends (EventEmitter as new () => TypedEmitter<Interfac
     });
   }
 
-  randomize(prefix: string) {
-    return `${prefix}_${(Math.random() + 1).toString(16).substring(8)}`;
-  }
-
   connectionUp = ({
     flags = {
       username: undefined,
@@ -191,10 +188,10 @@ export class kekwClient extends (EventEmitter as new () => TypedEmitter<Interfac
       minutes: 0,
       seconds: 0,
     },
-    clientID = this.randomize("mqttClient"),
+    clientID = randomize("mqttClient"),
     will = {
-      willTopic: this.randomize("topic"),
-      willMessage: this.randomize("message"),
+      willTopic: randomize("topic"),
+      willMessage: randomize("message"),
     },
   }: InterfacePacketConnect = {}) => {
     const fixedHeader = buildFixedHeader({

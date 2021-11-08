@@ -276,14 +276,10 @@ export const buildUnsubscribe = (
   let encodedUnsubTopic;
   //type check for single or multi topics
   if (typeof topic === "string") {
-    encodedUnsubTopic = [
-      0,
-      topic.length,
-      ...topic.split("").map((v) => v.charCodeAt(0)),
-    ];
+    encodedUnsubTopic = fieldWithSize(topic);
   } else {
     encodedUnsubTopic = topic
-      .map((v) => [0, v.length, ...v.split("").map((v) => v.charCodeAt(0))])
+      .map((v) => [...fieldWithSize(v)])
       .reduce((f, s) => [...f, ...s]);
   }
 
@@ -294,7 +290,7 @@ export const buildUnsubscribe = (
     ...packetIdentifier,
     ...encodedUnsubTopic,
   ]);
-  console.log("Unsubscribe Buffer", buffer);
+
   return buffer;
 };
 
